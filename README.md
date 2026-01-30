@@ -1,3 +1,20 @@
+# W26_4495_S2_DesmondC
+
+## 📋 Project Information
+
+| Field | Details |
+|-------|---------|
+| **Project Name** | BC Personal Health Management Platform |
+| **Student Name** | Desmond Chua |
+| **Student ID** | 300369803 |
+| **Email** | chuad1@student.douglascollege.ca |
+| **Course** | CSIS 4495 - Applied Research Project |
+| **Section** | 2 |
+| **Instructor** | Prof. Padmapriya Arasanipalai Kandhadai |
+| **Term** | Winter 2026 |
+
+---
+
 # 🏥 BC Personal Health Management Platform
 
 **CSIS 4495 Applied Research Project - Douglas College**
@@ -72,19 +89,21 @@ User Input → OpenAI NLP → Rule-Based Safety Check (CTAS) → ML Classifier �
 
 ## 📁 Repository Structure
 ```
-BC-Health-Platform/
+W26_4495_S2_DesmondC/
 ├── DocumentsAndReports/
 │   ├── proposal/           # Project proposal
 │   ├── progress-reports/   # Weekly progress reports
 │   ├── midterm/            # Midterm report & demo
 │   └── final-report/       # Final report & documentation
 │
-├── implementation/
+├── Implementation/
 │   ├── src/                # Source code (Streamlit app)
 │   ├── data/               # Datasets (raw & processed)
 │   ├── notebooks/          # Jupyter notebooks for exploration
 │   ├── samples/            # Proof of concept code
 │   └── tests/              # Unit tests
+│
+├── Misc/                   # Miscellaneous files
 │
 ├── .gitignore
 └── README.md
@@ -112,16 +131,6 @@ BC-Health-Platform/
 - **Interactive Dashboards:** Power BI embedded analytics and Plotly visualizations
 - **Healthcare Integration:** BC facility data and HealthLinkBC resources
 - **Documentation:** Complete technical documentation and user guide
-
----
-
-## 👤 Team
-
-| Role | Name | Student ID |
-|------|------|------------|
-| **Developer** | Desmond Chua | 300369803 |
-| **Instructor** | Prof. Priya | - |
-| **Course** | CSIS 4495 - Applied Research Project | Section 050 |
 
 ---
 
