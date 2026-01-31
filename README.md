@@ -91,19 +91,21 @@ User Input → OpenAI NLP → Rule-Based Safety Check (CTAS) → ML Classifier �
 ```
 W26_4495_S2_DesmondC/
 ├── DocumentsAndReports/
-│   ├── proposal/           # Project proposal
-│   ├── progress-reports/   # Weekly progress reports
+│   ├── final-report/       # Final report & documentation
 │   ├── midterm/            # Midterm report & demo
-│   └── final-report/       # Final report & documentation
+│   ├── progress-reports/   # Weekly progress reports
+│   ├── proposal/           # Project proposal
+│   └── worklog/            # Work hours tracking (Excel)
 │
 ├── Implementation/
-│   ├── src/                # Source code (Streamlit app)
 │   ├── data/               # Datasets (raw & processed)
 │   ├── notebooks/          # Jupyter notebooks for exploration
 │   ├── samples/            # Proof of concept code
+│   ├── src/                # Source code (Streamlit app)
 │   └── tests/              # Unit tests
 │
-├── Misc/                   # Miscellaneous files
+├── Misc/                   # Miscellaneous resources
+│   └── learning-notes/     # Study materials, certificates, notes
 │
 ├── .gitignore
 └── README.md
