@@ -1,0 +1,18 @@
+[theme]
+# Blue - buttons, links, active elements
+primaryColor = "#0078AE"
+
+# White - main content area
+backgroundColor = "#FFFFFF"
+
+# Light Cyan - sidebar background
+secondaryBackgroundColor = "#D4EFFC"
+
+# Dark Grey - text color
+textColor = "#53585F"
+
+font = "sans serif"
+
+[server]
+headless = true
+port = 8501
