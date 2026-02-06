@@ -175,7 +175,7 @@ def show_login_form():
     st.divider()
 
     # Demo mode info
-    st.info("Demo Mode: Use test@test.com / password123")
+    st.info("Demo Mode: Use test@test.com / Password123")
 
 
 # =============================================================================

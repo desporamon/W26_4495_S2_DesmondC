@@ -196,6 +196,51 @@ def validate_email(email: str) -> tuple[bool, str]:
 
 
 # =============================================================================
+# PAGE PROTECTION (Sprint 1D.7)
+# =============================================================================
+
+def require_authentication():
+    """
+    Check if user is authenticated. If not, show warning and stop the page.
+
+    This function should be called at the TOP of every protected page,
+    BEFORE any other page content. It acts as a "gate" that prevents
+    unauthenticated users from seeing the page content.
+
+    How it works:
+    1. Checks if 'authenticated' exists in session_state
+    2. If user is NOT authenticated, shows a warning message
+    3. Uses st.stop() to halt page rendering (nothing after this runs)
+
+    Usage:
+        # At the top of any protected page:
+        from components.auth import require_authentication
+        require_authentication()
+
+        # Only authenticated users will see content below this line
+        st.title("Protected Page")
+    """
+    import streamlit as st
+
+    # Initialize session state if it doesn't exist yet
+    # This handles the case where user navigates directly to a subpage
+    if 'authenticated' not in st.session_state:
+        st.session_state.authenticated = False
+
+    # Check if user is authenticated
+    if not st.session_state.authenticated:
+        # User is NOT logged in - show warning and stop
+        st.warning("🔒 Please login to access this page.")
+        st.info("👈 Go to the **app** page in the sidebar to login or register.")
+
+        # st.stop() prevents any code after this from running
+        # The page will only show the warning messages above
+        st.stop()
+
+    # If we reach here, user IS authenticated - page will continue rendering
+
+
+# =============================================================================
 # TEST BLOCK
 # =============================================================================
 
