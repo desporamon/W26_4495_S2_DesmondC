@@ -1,0 +1,42 @@
+Disease,urgency_level
+Heart attack,Emergency
+Paralysis (brain hemorrhage),Emergency
+Pneumonia,Emergency
+Dengue,Urgent
+Malaria,Urgent
+Typhoid,Urgent
+Hepatitis B,Urgent
+Hepatitis C,Urgent
+Hepatitis D,Urgent
+Hepatitis E,Urgent
+Alcoholic hepatitis,Urgent
+hepatitis A,Urgent
+Tuberculosis,Urgent
+Chicken pox,Urgent
+Jaundice,Urgent
+Diabetes,Urgent
+Hypoglycemia,Urgent
+AIDS,Urgent
+Drug Reaction,Urgent
+Hypertension,Routine
+Hypothyroidism,Routine
+Hyperthyroidism,Routine
+Bronchial Asthma,Routine
+Chronic cholestasis,Routine
+Peptic ulcer diseae,Routine
+Gastroenteritis,Routine
+GERD,Routine
+Arthritis,Routine
+Osteoarthristis,Routine
+Cervical spondylosis,Routine
+Dimorphic hemmorhoids(piles),Routine
+Varicose veins,Routine
+Urinary tract infection,Routine
+Migraine,Routine
+(vertigo) Paroymsal Positional Vertigo,Routine
+Allergy,Self-Care
+Common Cold,Self-Care
+Fungal infection,Self-Care
+Acne,Self-Care
+Psoriasis,Self-Care
+Impetigo,Self-Care
