@@ -130,6 +130,15 @@ W26_4495_S2_DesmondC/
 ├── .gitignore
 └── README.md
 ```
+---
+
+## 📊 Data Sources
+
+| Dataset | Source | Files | Purpose |
+|---------|--------|-------|---------|
+| **Disease Symptom Prediction** | [Kaggle (itachi9604)](https://www.kaggle.com/datasets/itachi9604/disease-symptom-description-dataset) | `symptom_disease_data.csv`, `symptom_severity.csv`, `symptom_description.csv`, `symptom_precaution.csv` | ML model training & Health Library |
+| **CTAS Guidelines** | Canadian Triage and Acuity Scale (2008) | Rule-based logic in `rules.py` | Emergency symptom detection |
+| **HealthLinkBC** | [healthlinkbc.ca](https://www.healthlinkbc.ca) | Referenced in app | Health education content |
 
 ---
 
