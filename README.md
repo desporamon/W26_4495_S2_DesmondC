@@ -96,36 +96,50 @@ W26_4495_S2_DesmondC/
 │   ├── midterm/                # Midterm report & demo video
 │   ├── progress-reports/       # Weekly progress reports
 │   ├── proposal/               # Project proposal
+│   ├── technical-reports/      # Data exploration & model training reports (PDF)
+│   │   ├── 01_data_exploration.pdf
+│   │   └── 02_train_model.pdf
 │   └── worklog/                # Work hours tracking (Excel)
 │
 ├── Implementation/
 │   ├── data/                   # Datasets (raw & processed)
-│   │   └── health_platform.db  # SQLite database
+│   │   ├── health_platform.db  # SQLite database
+│   │   ├── symptom_disease_data.csv
+│   │   ├── symptom_severity.csv
+│   │   └── urgency_mapping.csv
+│   ├── models/                 # Trained ML models & metadata
+│   │   ├── model.pkl           # Random Forest classifier (joblib)
+│   │   └── model_metadata.json # Symptom list, urgency mapping, thresholds
 │   ├── notebooks/              # Jupyter notebooks for exploration
+│   │   ├── 01_data_exploration.ipynb
+│   │   └── 02_train_model.ipynb
 │   ├── samples/                # Proof of concept code
 │   ├── src/                    # Source code (Streamlit app)
-│   │   ├── .streamlit/         # Streamlit configuration
+│   │   ├── .streamlit/
 │   │   │   └── config.toml     # Theme colors (VCH teal)
 │   │   ├── components/         # Reusable Python modules
 │   │   │   ├── auth.py         # Authentication (login, register, bcrypt)
 │   │   │   ├── chatbot.py      # Chatbot logic & conversation flow
 │   │   │   ├── database.py     # SQLite CRUD functions
 │   │   │   ├── openai_utils.py # OpenAI API integration
-│   │   │   └── rules.py        # CTAS rule-based safety checks
-│   │   ├── models/             # Trained ML models (.pkl files)
+│   │   │   ├── rules.py        # CTAS rule-based safety checks
+│   │   │   └── train_model.py  # ML training pipeline (Random Forest)
 │   │   ├── pages/              # Streamlit multi-page app
 │   │   │   ├── 1_🏠_Home.py
 │   │   │   ├── 2_💬_Symptom_Assessment.py
 │   │   │   ├── 3_📊_My_Dashboard.py
-│   │   │   ├── 4_🗺️_Facility_Finder.py
+│   │   │   ├── 4_🏥_Facility_Finder.py
 │   │   │   ├── 5_📚_Health_Library.py
 │   │   │   └── 6_📈_System_Analytics.py
-│   │   └── app.py              # Main Streamlit application
-│   └── tests/                  # Unit tests
+│   │   ├── app.py              # Main Streamlit application
+│   │   └── tests/              # Unit tests
+│   │       ├── test_openai.py
+│   │       ├── test_predict.py
+│   │       └── test_rules.py
 │
 ├── Misc/                       # Miscellaneous resources
-│   ├── design/                 # UI mockups (UX Pilot)
-│   └── learning-notes/         # Study materials, certificates, notes
+├── design/                     # UI mockups (UX Pilot)
+├── learning-notes/             # Study materials, certificates, notes
 │
 ├── .gitignore
 └── README.md
