@@ -229,13 +229,8 @@ def require_authentication():
 
     # Check if user is authenticated
     if not st.session_state.authenticated:
-        # User is NOT logged in - show warning and stop
-        st.warning("🔒 Please login to access this page.")
-        st.info("👈 Go to the **app** page in the sidebar to login or register.")
-
-        # st.stop() prevents any code after this from running
-        # The page will only show the warning messages above
-        st.stop()
+        # User is NOT logged in - redirect to the login page
+        st.switch_page("app.py")
 
     # If we reach here, user IS authenticated - page will continue rendering
 

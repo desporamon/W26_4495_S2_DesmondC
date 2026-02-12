@@ -25,6 +25,9 @@ from components.auth import (
     validate_email
 )
 
+# Import shared header banner and CSS helpers
+from components.header import render_header, inject_global_css, hide_sidebar
+
 
 # =============================================================================
 # PAGE CONFIGURATION
@@ -33,8 +36,12 @@ from components.auth import (
 st.set_page_config(
     page_title="BC Health Platform",
     page_icon="🏥",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
+
+# Inject global CSS immediately to prevent flash of unstyled sidebar
+inject_global_css()
 
 
 # =============================================================================
@@ -381,19 +388,12 @@ def show_authenticated_view():
     """
     Display the main app content for logged-in users.
 
-    Shows welcome message in sidebar and main content area.
+    Shows header banner and main content area.
     """
     # -----------------------------------------
-    # Sidebar with user info and logout
+    # Header banner (logo, title, user, logout)
     # -----------------------------------------
-    with st.sidebar:
-        st.markdown(f"### 👤 Welcome, {st.session_state.user_name}")
-
-        st.divider()
-
-        # Logout button
-        if st.button("🚪 Logout", use_container_width=True):
-            logout()
+    render_header()
 
     # -----------------------------------------
     # Main content area
@@ -533,7 +533,8 @@ def main():
     # -----------------------------------------
 
     if not st.session_state.authenticated:
-        # User is NOT logged in - show login/register screens
+        # User is NOT logged in - hide sidebar and show login/register
+        hide_sidebar()
         show_auth_view()
     else:
         # User IS logged in - show the main app

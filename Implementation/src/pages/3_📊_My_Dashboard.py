@@ -28,6 +28,9 @@ st.set_page_config(
     layout="wide"
 )
 
+from components.header import render_header
+render_header()
+
 
 # =============================================================================
 # PAGE CONTENT (Only visible to authenticated users)
