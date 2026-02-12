@@ -27,7 +27,7 @@ _LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "logo.png")
 
 
 @st.cache_data
-def _get_logo_base64() -> str:
+def get_logo_base64() -> str:
     """Load logo.png and return as a base64 string for HTML embedding."""
     with open(_LOGO_PATH, "rb") as f:
         return base64.b64encode(f.read()).decode()
@@ -230,7 +230,7 @@ def render_header():
         return
 
     user_name = st.session_state.get("user_name", "User")
-    logo_b64 = _get_logo_base64()
+    logo_b64 = get_logo_base64()
 
     # Inject banner-specific CSS (offsets for fixed header)
     st.markdown(_BANNER_CSS, unsafe_allow_html=True)

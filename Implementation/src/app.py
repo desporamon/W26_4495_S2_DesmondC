@@ -26,7 +26,7 @@ from components.auth import (
 )
 
 # Import shared header banner and CSS helpers
-from components.header import render_header, inject_global_css, hide_sidebar
+from components.header import render_header, inject_global_css, hide_sidebar, get_logo_base64
 
 
 # =============================================================================
@@ -398,7 +398,15 @@ def show_authenticated_view():
     # -----------------------------------------
     # Main content area
     # -----------------------------------------
-    st.title("🏥 BC Health Platform")
+    logo_b64 = get_logo_base64()
+    st.markdown(
+        f'<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">'
+        f'<img src="data:image/png;base64,{logo_b64}" '
+        f'style="height:65px;" alt="BC Health Platform">'
+        f'<span style="font-size:2em;font-weight:700;">BC Health Platform</span>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
     st.success(f"Welcome back, **{st.session_state.user_name}**! 👋")
 
@@ -453,9 +461,13 @@ def show_auth_view():
         # Header Section
         # -----------------------------------------
 
-        # App logo/title (centered)
+        # App logo (centered)
+        logo_b64 = get_logo_base64()
         st.markdown(
-            "<h1 style='text-align: center;'>🏥</h1>",
+            f'<div style="text-align:center;">'
+            f'<img src="data:image/png;base64,{logo_b64}" '
+            f'style="height:90px;" alt="BC Health Platform">'
+            f'</div>',
             unsafe_allow_html=True
         )
 

@@ -123,7 +123,7 @@ with st.sidebar:
 # PAGE HEADER
 # =============================================================================
 
-st.title("💬 Symptom Assessment")
+st.title("💬 Symptom Assessment Chatbot")
 
 st.warning(
     "**Important Disclaimer:** "
