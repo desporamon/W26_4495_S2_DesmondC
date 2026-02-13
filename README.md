@@ -23,7 +23,9 @@
 
 ## 📍 Overview
 
-A comprehensive healthcare navigation assistant for British Columbia residents featuring AI-powered symptom assessment, personalized health dashboards, and healthcare facility mapping. The platform uses a **hybrid Rule-Based + Machine Learning approach** to provide safe, accurate health guidance while connecting users with appropriate BC healthcare resources.
+The **BC Personal Health Management Platform** is a full-stack web application designed to help British Columbia residents navigate the provincial healthcare system with confidence. Built with Streamlit and powered by a **hybrid AI classification pipeline** — combining OpenAI natural language processing, CTAS-based rule logic, and a trained Random Forest ML model — the platform delivers real-time symptom assessment, personalized health dashboards, interactive facility mapping, and curated health education resources.
+
+This project demonstrates the practical application of machine learning, API integration, and modern web development to solve a real-world healthcare accessibility challenge in BC.
 
 ---
 
@@ -49,6 +51,86 @@ BC Health Platform addresses these issues through an intelligent, user-friendly 
 | 3 | **BC Healthcare Facility Finder** | Locate nearby hospitals, clinics, walk-ins, and pharmacies |
 | 4 | **Health Education Resources** | Curated BC-specific health information from HealthLinkBC |
 | 5 | **System Analytics Dashboard** | Usage patterns, health trends, and ML-powered insights |
+
+---
+
+## 🚀 Installation Guide (Development)
+
+### Prerequisites
+
+- **Python 3.10+** — [Download](https://www.python.org/downloads/)
+- **pip** — included with Python
+- **Git** — [Download](https://git-scm.com/downloads)
+- **OpenAI API Key** — [Get one here](https://platform.openai.com/api-keys)
+
+### Setup Instructions
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/desporamon/W26_4495_S2_DesmondC.git
+```
+
+**2. Navigate to the project directory**
+```bash
+cd W26_4495_S2_DesmondC
+```
+
+**3. Create and activate a Python virtual environment**
+```bash
+python -m venv venv
+```
+- **Windows:**
+  ```bash
+  venv\Scripts\activate
+  ```
+- **macOS / Linux:**
+  ```bash
+  source venv/bin/activate
+  ```
+
+**4. Install dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+**5. Set up the OpenAI API key**
+
+Create the secrets file at `Implementation/src/.streamlit/secrets.toml` and add your key:
+```toml
+OPENAI_API_KEY = "sk-proj-your-api-key-here"
+```
+> ⚠️ Replace the placeholder with your own API key from [OpenAI](https://platform.openai.com/api-keys). Never commit this file to version control.
+
+**6. ML Model**
+
+A pre-trained Random Forest model (`model.pkl`) is already included in `Implementation/models/`. No training step is required.
+
+To optionally retrain the model:
+```bash
+cd Implementation/src
+python -m components.train_model
+```
+
+**7. Run the Streamlit app**
+```bash
+cd Implementation/src
+streamlit run app.py
+```
+
+**8. Access the app**
+
+Open your browser and navigate to:
+```
+http://localhost:8501
+```
+
+**9. Demo credentials**
+
+A test account is available for quick access:
+| Field | Value |
+|-------|-------|
+| **Email** | `test@test.com` |
+| **Password** | `Password123` |
 
 ---
 
@@ -79,8 +161,8 @@ User Input → OpenAI NLP → Rule-Based Safety Check (CTAS) → ML Classifier �
 | **Platform** | Streamlit Cloud |
 | **Language** | Python 3.10+ |
 | **ML/NLP** | scikit-learn, NLTK, spaCy |
-| **AI Integration** | OpenAI API (GPT-4) |
-| **Visualization** | Power BI, Plotly |
+| **AI Integration** | OpenAI API (gpt-4o-mini) |
+| **Visualization** | Streamlit Charts, Plotly, Folium |
 | **Database** | SQLite |
 | **Version Control** | GitHub |
 | **Data Sources** | Kaggle, HealthLinkBC, CTAS Guidelines |
@@ -173,7 +255,7 @@ W26_4495_S2_DesmondC/
 
 - **Deployable Web App:** Fully functional Streamlit application on Streamlit Cloud
 - **Hybrid AI System:** OpenAI + Rule-Based + ML classification pipeline
-- **Interactive Dashboards:** Power BI embedded analytics and Plotly visualizations
+- **Interactive Dashboards:** Streamlit native charts, Plotly visualizations, and Folium maps
 - **Healthcare Integration:** BC facility data and HealthLinkBC resources
 - **Documentation:** Complete technical documentation and user guide
 
