@@ -437,6 +437,7 @@ def get_assessment_stats(user_id: int) -> Dict[str, Any]:
     stats = {
         'total_count': 0,
         'most_common_symptom': None,
+        'most_common_symptom_count': 0,
         'urgency_distribution': {
             'Emergency': 0,
             'Urgent': 0,
@@ -482,6 +483,7 @@ def get_assessment_stats(user_id: int) -> Dict[str, Any]:
 
         if symptom_counts:
             stats['most_common_symptom'] = max(symptom_counts, key=symptom_counts.get)
+            stats['most_common_symptom_count'] = symptom_counts[stats['most_common_symptom']]
 
         return stats
 
