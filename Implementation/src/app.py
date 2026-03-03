@@ -549,8 +549,8 @@ def main():
         hide_sidebar()
         show_auth_view()
     else:
-        # User IS logged in - show the main app
-        show_authenticated_view()
+        # User IS logged in - redirect to Home dashboard
+        st.switch_page("pages/1_🏠_Home.py")
 
 
 # =============================================================================
