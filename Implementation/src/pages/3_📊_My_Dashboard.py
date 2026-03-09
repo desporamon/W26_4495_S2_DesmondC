@@ -44,7 +44,6 @@ from components.database import get_user_assessments
 # Handle "New Assessment" navigation triggered by HTML link (same pattern as
 # the logout link in header.py — an <a> tag sets a query param, we catch it here).
 if st.query_params.get("nav") == "assessment":
-    st.query_params.clear()
     st.switch_page("pages/2_\U0001f4ac_Symptom_Assessment.py")
 
 
@@ -184,9 +183,8 @@ button[data-testid="stBaseButton-secondary"],
 .stat-icon-green  { background: #d1fae5; color: #059669; }
 
 /* -- Stat card typography -- */
-.stat-label    { font-size: 13px; color: #888; margin-top: 14px; }
 .stat-value    { font-size: 28px; font-weight: 700; color: #1a1a1a; margin: 2px 0; }
-.stat-subtitle { font-size: 12px; color: #aaa; }
+.stat-subtitle { font-size: 13px; color: #666666; }
 
 /* -- Status dot / arrow -- */
 .status-indicator {
@@ -377,12 +375,11 @@ c1, c2, c3, c4 = st.columns(4, gap="medium")
 with c1:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="border-top: 4px solid #2196F3; border-radius: 4px 4px 0 0; margin: -1px -1px 0 -1px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">Total Checks</div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div class="stat-icon stat-icon-blue">\u2714</div>
             <span style="color:#4caf50;font-weight:700;font-size:16px;">\u2191</span>
         </div>
-        <div class="stat-label">Total Checks</div>
         <div class="stat-value">{total_checks}</div>
         <div class="stat-subtitle">Since registration</div>
         """, unsafe_allow_html=True)
@@ -390,12 +387,11 @@ with c1:
 with c2:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="border-top: 4px solid #7C4DFF; border-radius: 4px 4px 0 0; margin: -1px -1px 0 -1px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">This Month</div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div class="stat-icon stat-icon-purple">\U0001f4c5</div>
             <span style="color:#aaa;font-weight:700;font-size:16px;">\u2014</span>
         </div>
-        <div class="stat-label">This Month</div>
         <div class="stat-value">{this_month_count}</div>
         <div class="stat-subtitle">{current_month_label}</div>
         """, unsafe_allow_html=True)
@@ -403,12 +399,11 @@ with c2:
 with c3:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="border-top: 4px solid #FF9800; border-radius: 4px 4px 0 0; margin: -1px -1px 0 -1px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">Most Common</div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div class="stat-icon stat-icon-orange">\U0001f9e0</div>
             <span class="status-indicator" style="background:#ea580c;margin-top:4px;"></span>
         </div>
-        <div class="stat-label">Most Common</div>
         <div class="stat-value">{most_common_symptom}</div>
         <div class="stat-subtitle">{most_common_pct}% of assessments</div>
         """, unsafe_allow_html=True)
@@ -416,12 +411,11 @@ with c3:
 with c4:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="border-top: 4px solid #4CAF50; border-radius: 4px 4px 0 0; margin: -1px -1px 0 -1px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">Avg Urgency</div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div class="stat-icon stat-icon-green">\u26a0</div>
             <span class="status-indicator" style="background:{urg_dot_color};margin-top:4px;"></span>
         </div>
-        <div class="stat-label">Avg Urgency</div>
         <div class="stat-value">{urg_label}</div>
         <div class="stat-subtitle">{urg_sub}</div>
         """, unsafe_allow_html=True)
@@ -573,7 +567,10 @@ with chart_col:
 with table_col:
     with st.container(border=True):
         st.markdown(
-            '<div style="background-color: #1a6b5c; color: white; padding: 8px 16px; border-radius: 4px; font-size: 16px; font-weight: 600; margin-bottom: 12px;">📋 Assessment History</div>',
+            '<div style="background-color: #1a6b5c; color: white; padding: 8px 16px; border-radius: 4px; font-size: 16px; font-weight: 600; margin-bottom: 8px;">📋 Assessment History</div>'
+            '<div style="text-align:right; margin-bottom: 12px;">'
+            '<span class="section-link" style="cursor:default;">View All</span>'
+            '</div>',
             unsafe_allow_html=True,
         )
 
