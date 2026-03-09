@@ -339,10 +339,16 @@ else:
 head_left, btn_export, btn_new = st.columns([5, 1.5, 1.5], vertical_alignment="bottom")
 
 with head_left:
-    st.markdown("## \U0001f4c8 My Personal Health Dashboard")
-    st.caption(f"Welcome back, {username}! Here's an overview of your health journey.")
+    st.markdown(
+        '<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">'
+        '<span style="font-size: 1.5rem; font-weight: 700;">📈 My Personal Health Dashboard</span><br>'
+        f'<span style="font-size: 14px; color: #888;">Welcome back, {username}! Here\'s an overview of your health journey.</span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 
 with btn_export:
+    st.markdown('<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">', unsafe_allow_html=True)
     st.download_button(
         label="\u2913 Export Report",
         data=generate_report_csv(all_assessments),
@@ -350,11 +356,14 @@ with btn_export:
         mime="text/csv",
         use_container_width=True,
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with btn_new:
     st.markdown(
+        '<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">'
         '<a href="?nav=assessment" target="_self" class="new-assess-btn">'
-        '+ &nbsp;New Assessment</a>',
+        '+ &nbsp;New Assessment</a>'
+        '</div>',
         unsafe_allow_html=True,
     )
 
@@ -368,6 +377,7 @@ c1, c2, c3, c4 = st.columns(4, gap="medium")
 with c1:
     with st.container(border=True):
         st.markdown(f"""
+        <div style="border-top: 4px solid #2196F3; border-radius: 4px 4px 0 0; margin: -1px -1px 0 -1px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div class="stat-icon stat-icon-blue">\u2714</div>
             <span style="color:#4caf50;font-weight:700;font-size:16px;">\u2191</span>
@@ -380,6 +390,7 @@ with c1:
 with c2:
     with st.container(border=True):
         st.markdown(f"""
+        <div style="border-top: 4px solid #7C4DFF; border-radius: 4px 4px 0 0; margin: -1px -1px 0 -1px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div class="stat-icon stat-icon-purple">\U0001f4c5</div>
             <span style="color:#aaa;font-weight:700;font-size:16px;">\u2014</span>
@@ -392,6 +403,7 @@ with c2:
 with c3:
     with st.container(border=True):
         st.markdown(f"""
+        <div style="border-top: 4px solid #FF9800; border-radius: 4px 4px 0 0; margin: -1px -1px 0 -1px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div class="stat-icon stat-icon-orange">\U0001f9e0</div>
             <span class="status-indicator" style="background:#ea580c;margin-top:4px;"></span>
@@ -404,6 +416,7 @@ with c3:
 with c4:
     with st.container(border=True):
         st.markdown(f"""
+        <div style="border-top: 4px solid #4CAF50; border-radius: 4px 4px 0 0; margin: -1px -1px 0 -1px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div class="stat-icon stat-icon-green">\u26a0</div>
             <span class="status-indicator" style="background:{urg_dot_color};margin-top:4px;"></span>
@@ -421,7 +434,10 @@ with c4:
 trend_left, trend_right = st.columns([3, 1], vertical_alignment="bottom")
 
 with trend_left:
-    st.markdown("**\U0001f4c8 Symptom Trends Over Time**")
+    st.markdown(
+        '<div style="background-color: #1a6b5c; color: white; padding: 8px 16px; border-radius: 4px; font-size: 16px; font-weight: 600; margin-bottom: 12px;">📈 Symptom Trends Over Time</div>',
+        unsafe_allow_html=True,
+    )
 
 with trend_right:
     date_filter = st.selectbox(
@@ -507,7 +523,10 @@ chart_col, table_col = st.columns(2, gap="medium")
 # ---- Left: Symptoms Breakdown ----
 with chart_col:
     with st.container(border=True):
-        st.markdown("**\U0001f52c Symptoms Breakdown**")
+        st.markdown(
+            '<div style="background-color: #1a6b5c; color: white; padding: 8px 16px; border-radius: 4px; font-size: 16px; font-weight: 600; margin-bottom: 12px;">🔬 Symptoms Breakdown</div>',
+            unsafe_allow_html=True,
+        )
 
         if symptom_counter:
             # Keep top symptoms, group rare ones as "Other"
@@ -553,15 +572,10 @@ with chart_col:
 # ---- Right: Assessment History ----
 with table_col:
     with st.container(border=True):
-        hdr_left, hdr_right = st.columns([3, 1])
-        with hdr_left:
-            st.markdown("**\U0001f4cb Assessment History**")
-        with hdr_right:
-            st.markdown(
-                '<div style="text-align:right;padding-top:4px;">'
-                '<span class="section-link" style="cursor:default;">View All</span></div>',
-                unsafe_allow_html=True,
-            )
+        st.markdown(
+            '<div style="background-color: #1a6b5c; color: white; padding: 8px 16px; border-radius: 4px; font-size: 16px; font-weight: 600; margin-bottom: 12px;">📋 Assessment History</div>',
+            unsafe_allow_html=True,
+        )
 
         recent_five = filtered[:5]
 
