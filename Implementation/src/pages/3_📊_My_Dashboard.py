@@ -482,6 +482,7 @@ if any(c > 0 for c in counts):
     fig_trend.add_trace(go.Scatter(
         x=month_labels,
         y=counts,
+        name="Assessments",
         fill="tozeroy",
         fillcolor="rgba(26, 107, 92, 0.12)",
         line=dict(color="#1a6b5c", width=2.5),
@@ -508,6 +509,7 @@ if any(c > 0 for c in counts):
         height=350,
         margin=dict(l=30, r=30, t=10, b=40),
         plot_bgcolor="white",
+        showlegend=False,
     )
     st.plotly_chart(fig_trend, use_container_width=True)
 else:
