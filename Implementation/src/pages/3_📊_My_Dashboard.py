@@ -15,6 +15,7 @@ import csv
 import io
 from datetime import datetime, timedelta
 from collections import Counter, OrderedDict
+import numpy as np
 import plotly.graph_objects as go
 
 from components.auth import require_authentication
@@ -488,6 +489,18 @@ if any(c > 0 for c in counts):
         marker=dict(size=7, color="#1a6b5c"),
         hovertemplate="%{x}: %{y} assessments<extra></extra>",
     ))
+    if len(counts) >= 2:
+        x_idx = np.arange(len(counts))
+        slope, intercept = np.polyfit(x_idx, counts, 1)
+        trend_y = slope * x_idx + intercept
+        fig_trend.add_trace(go.Scatter(
+            x=month_labels,
+            y=trend_y,
+            mode="lines",
+            line=dict(color="#ff7f0e", width=2, dash="dash"),
+            name="Trend",
+            hovertemplate="%{x}: %{y:.1f} (trend)<extra></extra>",
+        ))
     fig_trend.update_layout(
         xaxis=dict(tickfont=dict(size=12)),
         yaxis=dict(tickfont=dict(size=12), dtick=5, rangemode="tozero"),
