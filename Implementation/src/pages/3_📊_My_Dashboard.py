@@ -347,7 +347,7 @@ with head_left:
     with title_col:
         st.markdown(
             '<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">'
-            '<span style="font-size: 1.5rem; font-weight: 700;">📈 My Personal Health Dashboard</span><br>'
+            '<span style="font-size: 1.5rem; font-weight: 700;">My Personal Health Dashboard</span><br>'
             f'<span style="font-size: 14px; color: #888;">Welcome back, {username}! Here\'s an overview of your health journey.</span>'
             '</div>',
             unsafe_allow_html=True,
