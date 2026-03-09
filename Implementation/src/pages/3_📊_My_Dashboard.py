@@ -59,6 +59,9 @@ URGENCY_BADGES = {
 FILTER_KEY = "dash_date_filter"
 FILTER_OPTIONS = ["All Time", "Last 6 Months", "Last 3 Months", "Last Year"]
 
+URGENCY_FILTER_KEY = "dash_urgency_filter"
+URGENCY_FILTER_OPTIONS = ["All Urgency Levels", "Emergency", "Urgent", "Routine", "Self-Care"]
+
 
 def parse_dt(dt_str):
     """Parse a 'YYYY-MM-DD HH:MM:SS' string into a datetime object."""
@@ -279,6 +282,11 @@ if cutoff:
 else:
     filtered = list(all_assessments)
 
+# Apply urgency filter (additive on top of date filter)
+urgency_filter = st.session_state.get(URGENCY_FILTER_KEY, URGENCY_FILTER_OPTIONS[0])
+if urgency_filter != "All Urgency Levels":
+    filtered = [a for a in filtered if a.get("urgency_level") == urgency_filter]
+
 
 # =============================================================================
 # COMPUTE STATS
@@ -333,13 +341,17 @@ else:
 head_left, btn_export, btn_new = st.columns([5, 1.5, 1.5], vertical_alignment="bottom")
 
 with head_left:
-    st.markdown(
-        '<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">'
-        '<span style="font-size: 1.5rem; font-weight: 700;">📈 My Personal Health Dashboard</span><br>'
-        f'<span style="font-size: 14px; color: #888;">Welcome back, {username}! Here\'s an overview of your health journey.</span>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    logo_col, title_col = st.columns([0.5, 5])
+    with logo_col:
+        st.image("assets/logo.png", width=55)
+    with title_col:
+        st.markdown(
+            '<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">'
+            '<span style="font-size: 1.5rem; font-weight: 700;">📈 My Personal Health Dashboard</span><br>'
+            f'<span style="font-size: 14px; color: #888;">Welcome back, {username}! Here\'s an overview of your health journey.</span>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
 
 with btn_export:
     st.markdown('<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">', unsafe_allow_html=True)
@@ -402,7 +414,7 @@ with c4:
 # 3. SYMPTOM TRENDS OVER TIME  (Plotly area chart + date filter)
 # =============================================================================
 
-trend_left, trend_right = st.columns([3, 1], vertical_alignment="bottom")
+trend_left, urgency_col, date_col = st.columns([3, 1, 1], vertical_alignment="bottom")
 
 with trend_left:
     st.markdown(
@@ -410,7 +422,15 @@ with trend_left:
         unsafe_allow_html=True,
     )
 
-with trend_right:
+with urgency_col:
+    st.selectbox(
+        "Urgency level",
+        URGENCY_FILTER_OPTIONS,
+        key=URGENCY_FILTER_KEY,
+        label_visibility="collapsed",
+    )
+
+with date_col:
     date_filter = st.selectbox(
         "Date range",
         FILTER_OPTIONS,
