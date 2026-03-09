@@ -464,7 +464,7 @@ for i in range(n_months - 1, -1, -1):
         tm += 12
         ty -= 1
     month_keys.append(f"{ty}-{tm:02d}")
-    month_labels.append(datetime(ty, tm, 1).strftime("%B"))
+    month_labels.append(datetime(ty, tm, 1).strftime("%b %Y"))
 
 monthly_counts = OrderedDict((k, 0) for k in month_keys)
 for a in filtered:
