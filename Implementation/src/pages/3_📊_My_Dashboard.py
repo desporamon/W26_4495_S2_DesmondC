@@ -41,10 +41,6 @@ render_header()
 
 from components.database import get_user_assessments
 
-# Handle "New Assessment" navigation triggered by HTML link (same pattern as
-# the logout link in header.py — an <a> tag sets a query param, we catch it here).
-if st.query_params.get("nav") == "assessment":
-    st.switch_page("pages/2_\U0001f4ac_Symptom_Assessment.py")
 
 
 # =============================================================================
@@ -357,13 +353,10 @@ with btn_export:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with btn_new:
-    st.markdown(
-        '<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">'
-        '<a href="?nav=assessment" target="_self" class="new-assess-btn">'
-        '+ &nbsp;New Assessment</a>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">', unsafe_allow_html=True)
+    if st.button("+ New Assessment", type="primary", use_container_width=True):
+        st.switch_page("pages/2_\U0001f4ac_Symptom_Assessment.py")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # =============================================================================
@@ -375,11 +368,7 @@ c1, c2, c3, c4 = st.columns(4, gap="medium")
 with c1:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">Total Checks</div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div class="stat-icon stat-icon-blue">\u2714</div>
-            <span style="color:#4caf50;font-weight:700;font-size:16px;">\u2191</span>
-        </div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">\u2714 Total Checks</div>
         <div class="stat-value">{total_checks}</div>
         <div class="stat-subtitle">Since registration</div>
         """, unsafe_allow_html=True)
@@ -387,11 +376,7 @@ with c1:
 with c2:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">This Month</div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div class="stat-icon stat-icon-purple">\U0001f4c5</div>
-            <span style="color:#aaa;font-weight:700;font-size:16px;">\u2014</span>
-        </div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">\U0001f4c5 This Month</div>
         <div class="stat-value">{this_month_count}</div>
         <div class="stat-subtitle">{current_month_label}</div>
         """, unsafe_allow_html=True)
@@ -399,11 +384,7 @@ with c2:
 with c3:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">Most Common</div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div class="stat-icon stat-icon-orange">\U0001f9e0</div>
-            <span class="status-indicator" style="background:#ea580c;margin-top:4px;"></span>
-        </div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">\U0001f9e0 Most Common</div>
         <div class="stat-value">{most_common_symptom}</div>
         <div class="stat-subtitle">{most_common_pct}% of assessments</div>
         """, unsafe_allow_html=True)
@@ -411,11 +392,7 @@ with c3:
 with c4:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">Avg Urgency</div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div class="stat-icon stat-icon-green">\u26a0</div>
-            <span class="status-indicator" style="background:{urg_dot_color};margin-top:4px;"></span>
-        </div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">\u26a0 Avg Urgency</div>
         <div class="stat-value">{urg_label}</div>
         <div class="stat-subtitle">{urg_sub}</div>
         """, unsafe_allow_html=True)
@@ -564,21 +541,29 @@ with chart_col:
             )
 
 # ---- Right: Assessment History ----
+if "dash_hist_expanded" not in st.session_state:
+    st.session_state.dash_hist_expanded = False
+
 with table_col:
     with st.container(border=True):
         st.markdown(
-            '<div style="background-color: #1a6b5c; color: white; padding: 8px 16px; border-radius: 4px; font-size: 16px; font-weight: 600; margin-bottom: 8px;">📋 Assessment History</div>'
-            '<div style="text-align:right; margin-bottom: 12px;">'
-            '<span class="section-link" style="cursor:default;">View All</span>'
-            '</div>',
+            '<div style="background-color: #1a6b5c; color: white; padding: 8px 16px; border-radius: 4px; font-size: 16px; font-weight: 600; margin-bottom: 4px;">📋 Assessment History</div>',
             unsafe_allow_html=True,
         )
 
-        recent_five = filtered[:5]
+        # "View All" / "Show Less" toggle
+        _, toggle_col = st.columns([4, 1])
+        with toggle_col:
+            toggle_label = "Show Less" if st.session_state.dash_hist_expanded else "View All"
+            if st.button(toggle_label, key="hist_toggle"):
+                st.session_state.dash_hist_expanded = not st.session_state.dash_hist_expanded
+                st.rerun()
 
-        if recent_five:
+        show_assessments = filtered if st.session_state.dash_hist_expanded else filtered[:5]
+
+        if show_assessments:
             rows_html = ""
-            for a in recent_five:
+            for a in show_assessments:
                 date_str = format_date_long(a["created_at"])
                 symptom = get_primary_symptom(a)
                 urgency = a.get("urgency_level", "Self-Care")
