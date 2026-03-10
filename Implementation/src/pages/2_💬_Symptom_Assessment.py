@@ -374,18 +374,31 @@ else:
             # FOLLOW-UP — chatbot needs more information before final assessment
             # ------------------------------------------------------------------
             if result["status"] == "follow_up":
-                # If no symptoms collected yet, end immediately with redirect
+                # If no symptoms collected yet, decide based on which turn we're on.
                 if not result.get("collected_symptoms"):
-                    end_text = (
-                        "I'm only able to help with health symptom assessments. "
-                        "Please use **🔄 Start New Assessment** in the sidebar "
-                        "whenever you're ready to describe your symptoms. Take care! 💙"
-                    )
-                    st.markdown(end_text)
-                    dialog_state["assessment_complete"] = True
-                    st.session_state.chat_messages.append(
-                        {"role": "assistant", "content": end_text, "result": None}
-                    )
+                    if result.get("turn_count", 1) <= 1:
+                        # Turn 1: input may be vague but health-related — ask for detail
+                        gentle_text = (
+                            "I want to make sure I help you correctly. Could you describe "
+                            "your symptoms in a bit more detail? For example, where does it "
+                            "hurt, or what feels wrong?"
+                        )
+                        st.markdown(gentle_text)
+                        st.session_state.chat_messages.append(
+                            {"role": "assistant", "content": gentle_text, "result": None}
+                        )
+                    else:
+                        # Turn 2+: still nothing extracted — show non-medical redirect
+                        end_text = (
+                            "I'm only able to help with health symptom assessments. "
+                            "Please use **🔄 Start New Assessment** in the sidebar "
+                            "whenever you're ready to describe your symptoms. Take care! 💙"
+                        )
+                        st.markdown(end_text)
+                        dialog_state["assessment_complete"] = True
+                        st.session_state.chat_messages.append(
+                            {"role": "assistant", "content": end_text, "result": None}
+                        )
                 else:
                     follow_up_text = result["response"]
                     st.markdown(follow_up_text)
