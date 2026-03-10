@@ -1,20 +1,26 @@
+# Sprint 3C: Healthcare Facility Finder
 """
-BC Health Platform - Facility Finder Page
-Sprint 1D.7: Page Protection Implementation
+BC Health Platform - Healthcare Facility Finder
+Sprint 3C: Healthcare Facility Finder
 
-This page helps users find nearby healthcare facilities
-such as hospitals, clinics, and pharmacies in British Columbia.
+Helps BC residents find nearby hospitals, walk-in clinics, pharmacies,
+and urgent care centres using real facility data from the facilities CSV.
 """
 
+import os
+from urllib.parse import quote
+
+import pandas as pd
+import folium
 import streamlit as st
+from streamlit_folium import st_folium
+
 from components.auth import require_authentication
 
 
 # =============================================================================
-# PAGE PROTECTION - Must be logged in to view this page
+# PAGE PROTECTION — Must be logged in to view this page
 # =============================================================================
-# This MUST be called BEFORE any other page content!
-# If user is not authenticated, they will see a warning and the page stops here.
 require_authentication()
 
 
@@ -24,8 +30,8 @@ require_authentication()
 
 st.set_page_config(
     page_title="Facility Finder - BC Health Platform",
-    page_icon="🗺️",
-    layout="wide"
+    page_icon="🏥",
+    layout="wide",
 )
 
 from components.header import render_header
@@ -33,121 +39,430 @@ render_header()
 
 
 # =============================================================================
-# PAGE CONTENT (Only visible to authenticated users)
+# DATA LOADING
 # =============================================================================
 
-# Page header with personalized greeting
-st.title("🗺️ Facility Finder")
-st.write(f"Find healthcare facilities near you, **{st.session_state.user_name}**")
+@st.cache_data
+def load_facilities() -> pd.DataFrame:
+    csv_path = os.path.join(
+        os.path.dirname(__file__), "../../data/facilities.csv"
+    )
+    df = pd.read_csv(csv_path)
+    # Normalise types
+    df["open_now"] = (
+        df["open_now"].astype(str).str.strip().str.lower()
+        .map({"true": True, "false": False})
+        .fillna(False)
+    )
+    for col in ("rating", "distance_km", "latitude", "longitude"):
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    return df
 
-st.divider()
 
-# -----------------------------------------
-# Search Section
-# -----------------------------------------
-st.subheader("🔍 Search for Healthcare Facilities")
+facilities_df = load_facilities()
 
-# Create search filters in columns
-filter_col1, filter_col2 = st.columns(2)
 
-with filter_col1:
-    # Location input
-    location = st.text_input(
-        "📍 Your Location",
-        placeholder="Enter your city or postal code",
-        help="Enter your city name or postal code to find nearby facilities"
+# =============================================================================
+# CONSTANTS & HELPERS
+# =============================================================================
+
+_TEAL_HEADER = (
+    "background-color:#1a6b5c;color:white;padding:8px 16px;"
+    "border-radius:4px;font-size:16px;font-weight:600;margin-bottom:12px;"
+)
+
+TYPE_COLOR = {
+    "Hospital":      "#2196F3",
+    "Walk-In Clinic": "#4CAF50",
+    "Urgent Care":   "#4CAF50",
+    "Pharmacy":      "#FF9800",
+}
+
+TYPE_ICON = {
+    "Hospital":      "🏥",
+    "Walk-In Clinic": "🏠",
+    "Urgent Care":   "🚑",
+    "Pharmacy":      "💊",
+}
+
+
+def section_header(text: str) -> None:
+    st.markdown(
+        f'<div style="{_TEAL_HEADER}">{text}</div>',
+        unsafe_allow_html=True,
     )
 
-with filter_col2:
-    # Facility type selector
-    facility_type = st.selectbox(
-        "🏥 Facility Type",
-        options=[
-            "All Facilities",
-            "Hospitals",
-            "Walk-in Clinics",
-            "Family Doctors",
-            "Pharmacies",
-            "Urgent Care Centers",
-            "Mental Health Services"
-        ]
+
+def _color(facility_type: str) -> str:
+    return TYPE_COLOR.get(facility_type, "#607D8B")
+
+
+def build_map(df: pd.DataFrame) -> folium.Map:
+    """Build a Folium map centred on Vancouver with facility markers."""
+    m = folium.Map(
+        location=[49.2827, -123.1207],
+        zoom_start=11,
+        tiles="CartoDB positron",
     )
 
-# Additional filters
-st.subheader("⚙️ Additional Filters")
+    # "You are here" pin
+    folium.Marker(
+        location=[49.2827, -123.1207],
+        tooltip="📍 You are here",
+        popup="You are here",
+        icon=folium.Icon(color="red", icon="home", prefix="fa"),
+    ).add_to(m)
 
-filter_col3, filter_col4 = st.columns(2)
+    # One circle marker per facility
+    for _, row in df.iterrows():
+        lat, lon = row["latitude"], row["longitude"]
+        if pd.isna(lat) or pd.isna(lon):
+            continue
+        color = _color(row["type"])
+        open_label = "🟢 Open Now" if row["open_now"] else "🔴 Closed"
+        popup_html = (
+            f"<b>{row['name']}</b><br>"
+            f"<i>{row['type']}</i><br>"
+            f"📍 {row['address']}<br>"
+            f"📞 {row['phone']}<br>"
+            f"⭐ {row['rating']}<br>"
+            f"{open_label}"
+        )
+        folium.CircleMarker(
+            location=[lat, lon],
+            radius=8,
+            color=color,
+            fill=True,
+            fill_color=color,
+            fill_opacity=0.85,
+            popup=folium.Popup(popup_html, max_width=220),
+            tooltip=row["name"],
+        ).add_to(m)
+    return m
 
-with filter_col3:
-    # Distance slider
-    distance = st.slider(
-        "Maximum Distance (km)",
-        min_value=1,
-        max_value=50,
-        value=10,
-        help="Maximum distance from your location"
-    )
 
-with filter_col4:
-    # Open now checkbox
-    open_now = st.checkbox("Open Now", value=False, help="Only show facilities currently open")
-    accepts_walkins = st.checkbox("Accepts Walk-ins", value=False, help="Only show facilities that accept walk-in patients")
+def facility_card(row: pd.Series) -> str:
+    """Return an HTML facility card string for one facility row."""
+    t = row["type"]
+    color = _color(t)
+    icon = TYPE_ICON.get(t, "🏥")
 
-st.divider()
-
-# Search button
-if st.button("🔍 Search Facilities", use_container_width=True, type="primary"):
-    if not location.strip():
-        st.error("Please enter your location to search for facilities.")
+    if row["open_now"]:
+        badge = (
+            '<span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;'
+            'border-radius:12px;font-size:0.78em;font-weight:600;">Open Now</span>'
+        )
     else:
-        with st.spinner("Searching for facilities..."):
-            import time
-            time.sleep(1.5)  # Simulate search time
+        badge = (
+            '<span style="background:#f5f5f5;color:#757575;padding:2px 8px;'
+            'border-radius:12px;font-size:0.78em;font-weight:600;">Closed</span>'
+        )
 
-        st.success(f"Found 5 {facility_type.lower()} within {distance}km of '{location}'")
+    maps_url = (
+        "https://www.google.com/maps/search/?api=1&query="
+        + quote(f"{row['address']}, {row['city']}, BC")
+    )
+    tel_url = f"tel:{row['phone'].replace('-', '').replace(' ', '')}"
 
-        # Placeholder results
-        st.divider()
-
-        # Sample facility cards
-        for i in range(3):
-            with st.container():
-                col1, col2 = st.columns([3, 1])
-
-                with col1:
-                    st.markdown(f"### 🏥 Sample Healthcare Facility {i+1}")
-                    st.write(f"📍 123 Example Street, {location}")
-                    st.write("📞 (604) 555-0100")
-                    st.caption("⭐ 4.5/5 • Open 8:00 AM - 8:00 PM")
-
-                with col2:
-                    st.metric("Distance", f"{(i+1) * 2.5:.1f} km")
-                    st.button("📍 Directions", key=f"dir_{i}", use_container_width=True)
-
-                st.divider()
-
-        st.info("Note: This is placeholder data. Real facility data will be integrated in a future sprint.")
-
-# -----------------------------------------
-# BC Health Authorities Info
-# -----------------------------------------
-st.subheader("🏛️ BC Health Authorities")
-
-st.markdown("""
-British Columbia's healthcare is organized into five regional health authorities:
-
-| Health Authority | Region |
-|-----------------|--------|
-| Fraser Health | Surrey, Burnaby, New Westminster, and Fraser Valley |
-| Vancouver Coastal Health | Vancouver, Richmond, North Shore, and Sea-to-Sky |
-| Interior Health | Kelowna, Kamloops, and the BC Interior |
-| Island Health | Vancouver Island and surrounding islands |
-| Northern Health | Prince George and Northern BC |
-""")
+    return f"""
+<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;
+  padding:16px;margin-bottom:10px;">
+  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+    <div style="background:{color}22;color:{color};border-radius:8px;
+      padding:8px 10px;font-size:1.4em;flex-shrink:0;">{icon}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:0.97em;color:#1a1a1a;
+        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row['name']}</div>
+      <div style="color:#555;font-size:0.83em;margin-top:3px;">
+        📍 {row['address']}, {row['city']}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap;">
+        <span style="font-size:0.83em;">⭐ {row['rating']:.1f}</span>
+        <span style="color:#bbb;">•</span>
+        <span style="font-size:0.82em;color:#666;">{row['distance_km']:.1f} km away</span>
+        {badge}
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <a href="{maps_url}" target="_blank"
+      style="flex:1;display:inline-block;text-align:center;padding:7px 0;
+        border:1.5px solid #1a6b5c;border-radius:6px;color:#1a6b5c;
+        background:white;text-decoration:none;font-size:0.84em;font-weight:600;">
+      🧭 Directions
+    </a>
+    <a href="{tel_url}"
+      style="flex:1;display:inline-block;text-align:center;padding:7px 0;
+        border:none;border-radius:6px;color:white;background:{color};
+        text-decoration:none;font-size:0.84em;font-weight:600;">
+      📞 Call
+    </a>
+  </div>
+</div>"""
 
 
-# -----------------------------------------
-# Footer
-# -----------------------------------------
+# =============================================================================
+# PAGE HEADER
+# =============================================================================
+
+st.title("🏥 BC Healthcare Facility Finder")
+st.markdown("Find hospitals, clinics, and pharmacies near you")
+
+
+# =============================================================================
+# 2B — EMERGENCY CONTACTS
+# =============================================================================
+
+section_header("🚨 Emergency Contacts")
+
+ec1, ec2, ec3 = st.columns(3)
+
+with ec1:
+    st.markdown("""
+<div style="background:white;border-top:4px solid #f44336;border-radius:8px;
+  padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;">
+  <div style="font-size:1.8em;margin-bottom:4px;">📞</div>
+  <div style="color:#555;font-size:0.9em;margin-bottom:4px;font-weight:600;">Emergency Services</div>
+  <div style="font-size:2.2em;font-weight:700;color:#f44336;">911</div>
+  <div style="color:#888;font-size:0.82em;margin-top:6px;">For life-threatening emergencies</div>
+</div>""", unsafe_allow_html=True)
+
+with ec2:
+    st.markdown("""
+<div style="background:white;border-top:4px solid #2196F3;border-radius:8px;
+  padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;">
+  <div style="font-size:1.8em;margin-bottom:4px;">👤</div>
+  <div style="color:#555;font-size:0.9em;margin-bottom:4px;font-weight:600;">HealthLink BC</div>
+  <div style="font-size:2.2em;font-weight:700;color:#2196F3;">811</div>
+  <div style="color:#888;font-size:0.82em;margin-top:6px;">24/7 health advice from nurses</div>
+</div>""", unsafe_allow_html=True)
+
+with ec3:
+    st.markdown("""
+<div style="background:white;border-top:4px solid #9c27b0;border-radius:8px;
+  padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;">
+  <div style="font-size:1.8em;margin-bottom:4px;">📞</div>
+  <div style="color:#555;font-size:0.9em;margin-bottom:4px;font-weight:600;">Crisis Line</div>
+  <div style="font-size:1.5em;font-weight:700;color:#9c27b0;">1-800-784-2433</div>
+  <div style="color:#888;font-size:0.82em;margin-top:6px;">Mental health support</div>
+</div>""", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# =============================================================================
+# 2C — SEARCH FACILITIES
+# =============================================================================
+
+section_header("🔍 Search Facilities")
+
+# Initialise search results in session state
+if "ff_results" not in st.session_state:
+    st.session_state.ff_results = facilities_df.copy()
+
+fc1, fc2, fc3, fc4, fc5 = st.columns([2, 2, 2, 1, 2])
+
+with fc1:
+    type_options = ["All Types"] + sorted(
+        facilities_df["type"].dropna().unique().tolist()
+    )
+    selected_type = st.selectbox(
+        "Facility Type", type_options, label_visibility="collapsed"
+    )
+
+with fc2:
+    region_options = ["All Regions"] + sorted(
+        facilities_df["region"].dropna().unique().tolist()
+    )
+    selected_region = st.selectbox(
+        "Region", region_options, label_visibility="collapsed"
+    )
+
+with fc3:
+    if selected_region == "All Regions":
+        city_pool = facilities_df
+    else:
+        city_pool = facilities_df[facilities_df["region"] == selected_region]
+    city_options = ["All Cities"] + sorted(city_pool["city"].dropna().unique().tolist())
+    selected_city = st.selectbox(
+        "City", city_options, label_visibility="collapsed"
+    )
+
+with fc4:
+    open_now_toggle = st.toggle("Open Now Only")
+
+with fc5:
+    search_clicked = st.button("🔍 Search", use_container_width=True, type="primary")
+
+if search_clicked:
+    filtered = facilities_df.copy()
+    if selected_type != "All Types":
+        filtered = filtered[filtered["type"] == selected_type]
+    if selected_region != "All Regions":
+        filtered = filtered[filtered["region"] == selected_region]
+    if selected_city != "All Cities":
+        filtered = filtered[filtered["city"] == selected_city]
+    if open_now_toggle:
+        filtered = filtered[filtered["open_now"] == True]
+    st.session_state.ff_results = filtered.reset_index(drop=True)
+
+display_df = st.session_state.ff_results
+
+
+# =============================================================================
+# 2D — INTERACTIVE MAP
+# =============================================================================
+
+section_header("🗺️ Interactive Map")
+
+st_folium(build_map(display_df), width="100%", height=400)
+
+st.markdown(
+    "🔵 **Hospitals** &nbsp;&nbsp; 🟢 **Clinics & Urgent Care** &nbsp;&nbsp; 🟠 **Pharmacies**",
+    unsafe_allow_html=True,
+)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# =============================================================================
+# 2E — NEARBY FACILITIES
+# =============================================================================
+
+count = len(display_df)
+near_hdr, _, sort_col, filter_col = st.columns([6, 1, 1, 1])
+
+with near_hdr:
+    section_header(f"📋 Nearby Facilities ({count} found)")
+with sort_col:
+    st.button("↕ Sort By", key="sort_btn", use_container_width=True)
+with filter_col:
+    st.button("▼ Filter", key="filter_btn", use_container_width=True)
+
+if count == 0:
+    st.info(
+        "No facilities match your search criteria. "
+        "Try adjusting your filters or clearing the region/city selection."
+    )
+else:
+    rows = display_df.reset_index(drop=True)
+    for i in range(0, len(rows), 2):
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown(facility_card(rows.iloc[i]), unsafe_allow_html=True)
+        with col_b:
+            if i + 1 < len(rows):
+                st.markdown(facility_card(rows.iloc[i + 1]), unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# =============================================================================
+# 2F — HEALTH TIPS & INFORMATION
+# =============================================================================
+
+section_header("💡 Health Tips & Information")
+
+TIPS = [
+    (
+        "🕐", "When to Visit Emergency",
+        "Visit the emergency department for severe chest pain, difficulty breathing, "
+        "severe bleeding, loss of consciousness, or suspected stroke symptoms.",
+    ),
+    (
+        "👤", "Walk-In Clinic vs Urgent Care",
+        "Walk-in clinics handle minor illnesses and injuries. Urgent care centers treat "
+        "more serious conditions that aren't life-threatening but need immediate attention.",
+    ),
+    (
+        "📋", "What to Bring",
+        "Always bring your BC Services Card, list of current medications, relevant medical "
+        "history, and insurance information if applicable.",
+    ),
+    (
+        "📞", "Call Ahead",
+        "For walk-in clinics, call ahead to check wait times and confirm they can address "
+        "your specific health concern before visiting.",
+    ),
+]
+
+tip_left, tip_right = st.columns(2)
+tip_cols = [tip_left, tip_right]
+
+for i, (icon, title, body) in enumerate(TIPS):
+    with tip_cols[i % 2]:
+        st.markdown(f"""
+<div style="background:#f0f7ff;border:1px solid #c8deff;border-radius:8px;
+  padding:16px;margin-bottom:12px;">
+  <div style="font-size:1em;font-weight:700;margin-bottom:6px;">{icon} {title}</div>
+  <div style="color:#444;font-size:0.87em;line-height:1.55;">{body}</div>
+</div>""", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# =============================================================================
+# 2G — UNDERSTANDING FACILITY TYPES
+# =============================================================================
+
+section_header("🏥 Understanding Facility Types")
+
+FACILITY_TYPE_CARDS = [
+    (
+        "#2196F3", "🏥", "Hospitals",
+        "Full-service medical facilities offering emergency care, surgery, diagnostic "
+        "services, and specialized treatments. Open 24/7 for emergencies.",
+        ["24/7 Emergency", "Surgery", "Specialists"],
+        "#e3f2fd", "#1565c0",
+    ),
+    (
+        "#FF9800", "🚑", "Urgent Care Centers",
+        "For non-life-threatening conditions requiring immediate attention. Treat injuries, "
+        "infections, and acute illnesses with extended hours.",
+        ["Extended Hours", "X-Rays", "Lab Tests"],
+        "#fff3e0", "#bf360c",
+    ),
+    (
+        "#4CAF50", "🏠", "Walk-In Clinics",
+        "Convenient care for minor illnesses and injuries without appointments. Perfect for "
+        "cold, flu, minor cuts, and routine health concerns.",
+        ["No Appointment", "Quick Service", "Prescriptions"],
+        "#e8f5e9", "#1b5e20",
+    ),
+    (
+        "#FF9800", "💊", "Pharmacies",
+        "Dispense prescription medications, offer over-the-counter products, and provide "
+        "health consultations. Many offer immunizations and health screenings.",
+        ["Prescriptions", "Immunizations", "Consultations"],
+        "#fff3e0", "#bf360c",
+    ),
+]
+
+ft_left, ft_right = st.columns(2)
+ft_cols = [ft_left, ft_right]
+
+for i, (color, icon, name, desc, tags, tag_bg, tag_color) in enumerate(FACILITY_TYPE_CARDS):
+    tag_pills = " ".join(
+        f'<span style="background:{tag_bg};color:{tag_color};padding:2px 8px;'
+        f'border-radius:12px;font-size:0.78em;margin-right:2px;">{t}</span>'
+        for t in tags
+    )
+    with ft_cols[i % 2]:
+        st.markdown(f"""
+<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;
+  padding:18px;margin-bottom:12px;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+    <div style="background:{color}22;color:{color};border-radius:8px;
+      padding:8px 10px;font-size:1.4em;">{icon}</div>
+    <strong style="font-size:0.97em;">{name}</strong>
+  </div>
+  <div style="color:#555;font-size:0.87em;line-height:1.5;margin-bottom:10px;">{desc}</div>
+  <div>{tag_pills}</div>
+</div>""", unsafe_allow_html=True)
+
+
+# =============================================================================
+# FOOTER
+# =============================================================================
+
 st.divider()
-st.caption("BC Health Platform - Connecting you with healthcare across British Columbia")
+st.caption("BC Health Platform — Connecting you with healthcare across British Columbia")
