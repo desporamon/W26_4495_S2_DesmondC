@@ -3,7 +3,7 @@
 BC Health Platform - Healthcare Facility Finder
 Sprint 3C: Healthcare Facility Finder
 
-Helps BC residents find nearby hospitals, walk-in clinics, pharmacies,
+Helps BC residents find nearby hospitals, walk-in clinics,
 and urgent care centres using real facility data from the facilities CSV.
 """
 
@@ -74,15 +74,13 @@ _TEAL_HEADER = (
 TYPE_COLOR = {
     "Hospital":      "#2196F3",
     "Walk-In Clinic": "#4CAF50",
-    "Urgent Care":   "#4CAF50",
-    "Pharmacy":      "#FF9800",
+    "Urgent Care":   "#FF9800",
 }
 
 TYPE_ICON = {
     "Hospital":      "🏥",
     "Walk-In Clinic": "🏠",
     "Urgent Care":   "🚑",
-    "Pharmacy":      "💊",
 }
 
 
@@ -205,7 +203,7 @@ def facility_card(row: pd.Series) -> str:
 # =============================================================================
 
 st.title("🏥 BC Healthcare Facility Finder")
-st.markdown("Find hospitals, clinics, and pharmacies near you")
+st.markdown("Find hospitals, clinics, and urgent care centres near you")
 
 
 # =============================================================================
@@ -262,9 +260,7 @@ if "ff_results" not in st.session_state:
 fc1, fc2, fc3, fc4, fc5 = st.columns([2, 2, 2, 1, 2])
 
 with fc1:
-    type_options = ["All Types"] + sorted(
-        facilities_df["type"].dropna().unique().tolist()
-    )
+    type_options = ["All Types", "Hospital", "Walk-In Clinic", "Urgent Care"]
     selected_type = st.selectbox(
         "Facility Type", type_options, label_visibility="collapsed"
     )
@@ -317,7 +313,7 @@ section_header("🗺️ Interactive Map")
 st_folium(build_map(display_df), width="100%", height=400)
 
 st.markdown(
-    "🔵 **Hospitals** &nbsp;&nbsp; 🟢 **Clinics & Urgent Care** &nbsp;&nbsp; 🟠 **Pharmacies**",
+    "🔵 **Hospitals** &nbsp;&nbsp; 🟢 **Walk-In Clinics** &nbsp;&nbsp; 🟠 **Urgent Care**",
     unsafe_allow_html=True,
 )
 
@@ -427,13 +423,6 @@ FACILITY_TYPE_CARDS = [
         "cold, flu, minor cuts, and routine health concerns.",
         ["No Appointment", "Quick Service", "Prescriptions"],
         "#e8f5e9", "#1b5e20",
-    ),
-    (
-        "#FF9800", "💊", "Pharmacies",
-        "Dispense prescription medications, offer over-the-counter products, and provide "
-        "health consultations. Many offer immunizations and health screenings.",
-        ["Prescriptions", "Immunizations", "Consultations"],
-        "#fff3e0", "#bf360c",
     ),
 ]
 
