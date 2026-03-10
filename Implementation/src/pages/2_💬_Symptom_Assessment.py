@@ -2,15 +2,20 @@
 # BC Health Platform - Symptom Assessment Chat Page
 # =============================================================================
 # Sprint 2D: Full chatbot integration with 3-layer assessment pipeline.
+# Sprint 3E: Multi-turn chatbot UI enhancement
 # =============================================================================
 
 """
-AI-powered Symptom Assessment page with real-time chat interface.
+AI-powered Symptom Assessment page — multi-turn conversational interface.
 
 Uses the 3-layer hybrid classification system:
     Layer 1: OpenAI  — Extract structured symptoms from natural language
     Layer 2: Rules   — Catch life-threatening emergencies (CTAS safety layer)
     Layer 3: ML      — Classify non-critical symptoms with a trained model
+
+Multi-turn flow (Sprint 3E):
+    The chatbot asks up to 3 follow-up questions to gather duration, severity,
+    and body location before triggering the final assessment pipeline.
 """
 
 import streamlit as st
@@ -36,7 +41,7 @@ st.set_page_config(
 # =============================================================================
 
 from components.header import render_header
-from components.chatbot import run_assessment
+from components.chatbot import initialize_dialog_state, process_multiturn_message
 from components.database import save_assessment
 
 render_header()
@@ -92,31 +97,71 @@ URGENCY_GUIDE_HTML = (
 # SESSION STATE INITIALISATION
 # =============================================================================
 
-if "chat_messages" not in st.session_state:
+def _reset_conversation():
+    """Clear dialog state and chat history to start a fresh assessment."""
     user_name = st.session_state.get("user_name", "there")
+    st.session_state.dialog_state = initialize_dialog_state()
     st.session_state.chat_messages = [
         {
             "role": "assistant",
             "content": (
-                f"Hello {user_name}! I'm here to help assess your symptoms "
-                "and guide you to the right care. What symptoms are you "
-                "experiencing today?"
+                f"Hello {user_name}! I'm here to help assess your symptoms. "
+                "What symptoms are you experiencing today?"
             ),
             "result": None,
         }
     ]
-if "saved_assessments" not in st.session_state:
     st.session_state.saved_assessments = set()
 
 
+# Initialise on first load (or if dialog_state was never set)
+if "dialog_state" not in st.session_state:
+    _reset_conversation()
+
+if "saved_assessments" not in st.session_state:
+    st.session_state.saved_assessments = set()
+
+# Convenience alias — mutations propagate because dicts are passed by reference
+dialog_state: dict = st.session_state.dialog_state
+
+
 # =============================================================================
-# SIDEBAR — Clear chat button
+# SIDEBAR
 # =============================================================================
 
 with st.sidebar:
-    if st.button("🗑️ Clear Chat", use_container_width=True):
-        st.session_state.chat_messages = []
+    st.markdown("### 💬 Assessment Controls")
+
+    if st.button("🔄 Start New Assessment", use_container_width=True):
+        _reset_conversation()
         st.rerun()
+
+    st.divider()
+
+    # Live progress panel — shows what's been collected across turns
+    turn_count = dialog_state.get("turn_count", 0)
+    symptoms_so_far = dialog_state.get("symptoms", [])
+
+    if turn_count > 0:
+        st.markdown("**📋 Collected so far:**")
+        if symptoms_so_far:
+            st.markdown(f"- **Symptoms:** {', '.join(symptoms_so_far)}")
+        if dialog_state.get("duration"):
+            st.markdown(f"- **Duration:** {dialog_state['duration']}")
+        if dialog_state.get("severity"):
+            st.markdown(f"- **Severity:** {dialog_state['severity']}")
+        if dialog_state.get("body_location"):
+            st.markdown(f"- **Location:** {dialog_state['body_location']}")
+
+        if dialog_state.get("assessment_complete"):
+            st.success("✅ Assessment complete")
+        else:
+            max_turns = 3
+            remaining = max(0, max_turns - turn_count)
+            if remaining > 0:
+                st.caption(
+                    f"Up to {remaining} more question(s) before final assessment."
+                )
 
 
 # =============================================================================
@@ -137,6 +182,132 @@ st.divider()
 
 
 # =============================================================================
+# HELPER — render a final assessment result card
+# =============================================================================
+
+def render_assessment_result(result: dict) -> str:
+    """
+    Render the full assessment result card inside the current st.chat_message
+    context using live Streamlit widgets.
+
+    Returns the pre-rendered markdown string to be stored in chat_messages so
+    the history display loop can replay the same content on subsequent reruns.
+    """
+    response_parts = []
+
+    # ==================== EMERGENCY ====================
+    if result["status"] == "emergency":
+        st.error(f"🚨 **EMERGENCY DETECTED — {result['rule_name']}**")
+        st.markdown(f"**⚠️ {result['action']}**")
+        st.markdown(result["description"])
+        st.markdown(
+            f"**CTAS Level:** {result['ctas_level']} &nbsp;|&nbsp; "
+            f"**Matched symptoms:** {', '.join(result['matched_symptoms'])}"
+        )
+        st.markdown(
+            f"**Urgency:** {urgency_badge('Emergency')}",
+            unsafe_allow_html=True,
+        )
+        st.markdown(URGENCY_GUIDE_HTML, unsafe_allow_html=True)
+
+        response_parts.append(
+            f"🚨 **EMERGENCY DETECTED — {result['rule_name']}**\n\n"
+            f"**⚠️ {result['action']}**\n\n"
+            f"{result['description']}\n\n"
+            f"**CTAS Level:** {result['ctas_level']} &nbsp;|&nbsp; "
+            f"**Matched symptoms:** {', '.join(result['matched_symptoms'])}\n\n"
+            f"**Urgency:** {urgency_badge('Emergency')}\n\n"
+            f"{URGENCY_GUIDE_HTML}"
+        )
+
+    # ==================== ML PREDICTION ====================
+    elif result["status"] == "ml_prediction":
+        st.markdown("**Extracted Symptoms:**")
+        st.markdown(symptom_pills(result["extracted_symptoms"]), unsafe_allow_html=True)
+
+        confidence_pct = f"{result['confidence']:.0%}"
+        st.markdown(
+            f"**Predicted Condition:** {result['predicted_disease']} "
+            f"({confidence_pct} confidence)"
+        )
+        st.markdown(
+            f"**Urgency:** {urgency_badge(result['urgency_level'])}",
+            unsafe_allow_html=True,
+        )
+        st.markdown(f"**Recommendation:** {result['recommendation']}")
+
+        st.divider()
+        st.markdown("**📞 BC Health Resources**")
+        st.markdown("- **HealthLink BC:** Call **8-1-1** (free health advice, 24/7)")
+        if result["urgency_level"] in ("Emergency", "Urgent"):
+            st.markdown(
+                "- **Find nearest ER:** "
+                "[BC Emergency Room Finder]"
+                "(https://www.healthlinkbc.ca/health-services/search)"
+            )
+        st.markdown("- Find a walk-in clinic near you on the **Facility Finder** page")
+        st.markdown(URGENCY_GUIDE_HTML, unsafe_allow_html=True)
+
+        response_parts.append(
+            f"**Extracted Symptoms:** {', '.join(result['extracted_symptoms'])}\n\n"
+            f"**Predicted Condition:** {result['predicted_disease']} "
+            f"({confidence_pct} confidence)\n\n"
+            f"**Urgency:** {urgency_badge(result['urgency_level'])}\n\n"
+            f"**Recommendation:** {result['recommendation']}\n\n---\n\n"
+            f"**📞 BC Health Resources**\n"
+            f"- **HealthLink BC:** Call **8-1-1** (free health advice, 24/7)\n"
+            f"- Find a walk-in clinic near you on the **Facility Finder** page\n\n"
+            f"{URGENCY_GUIDE_HTML}"
+        )
+
+    # ==================== OPENAI FALLBACK ====================
+    elif result["status"] == "openai_fallback":
+        st.markdown("**Extracted Symptoms:**")
+        st.markdown(symptom_pills(result["extracted_symptoms"]), unsafe_allow_html=True)
+
+        st.info(
+            "Our model couldn't make a confident prediction. "
+            "Here's general guidance:"
+        )
+        st.markdown(result["recommendation"])
+        st.markdown(
+            f"**Urgency:** {urgency_badge(result['urgency_level'])}",
+            unsafe_allow_html=True,
+        )
+
+        st.divider()
+        st.markdown("**📞 BC Health Resources**")
+        st.markdown("- **HealthLink BC:** Call **8-1-1** (free health advice, 24/7)")
+        if result["urgency_level"] in ("Emergency", "Urgent"):
+            st.markdown(
+                "- **Find nearest ER:** "
+                "[BC Emergency Room Finder]"
+                "(https://www.healthlinkbc.ca/health-services/search)"
+            )
+        st.markdown("- Find a walk-in clinic near you on the **Facility Finder** page")
+        st.markdown(URGENCY_GUIDE_HTML, unsafe_allow_html=True)
+
+        response_parts.append(
+            f"**Extracted Symptoms:** {', '.join(result['extracted_symptoms'])}\n\n"
+            f"Our model couldn't make a confident prediction. "
+            f"Here's general guidance:\n\n"
+            f"{result['recommendation']}\n\n"
+            f"**Urgency:** {urgency_badge(result['urgency_level'])}\n\n---\n\n"
+            f"**📞 BC Health Resources**\n"
+            f"- **HealthLink BC:** Call **8-1-1** (free health advice, 24/7)\n"
+            f"- Find a walk-in clinic near you on the **Facility Finder** page\n\n"
+            f"{URGENCY_GUIDE_HTML}"
+        )
+
+    # ==================== ERROR ====================
+    elif result["status"] == "error":
+        st.error(f"❌ {result['error']}")
+        response_parts.append(f"❌ {result['error']}")
+
+    return "\n\n".join(response_parts)
+
+
+# =============================================================================
 # DISPLAY CHAT HISTORY
 # =============================================================================
 
@@ -145,14 +316,14 @@ for idx, msg in enumerate(st.session_state.chat_messages):
         if msg["role"] == "user":
             st.markdown(msg["content"])
         else:
-            # Assistant messages store pre-rendered content and the raw result
+            # Pre-rendered markdown (safe for follow-up text and full result cards)
             st.markdown(msg["content"], unsafe_allow_html=True)
 
-            # Show Save / Saved for saveable results
+            # Save button for final (non-emergency) assessments
             result = msg.get("result")
             if result and result.get("status") in ("ml_prediction", "openai_fallback"):
                 if idx in st.session_state.saved_assessments:
-                    st.markdown("✅ Saved")
+                    st.markdown("✅ **Saved to your health history**")
                 else:
                     if st.button("💾 Save Assessment", key=f"save_hist_{idx}"):
                         saved_id = save_assessment(
@@ -170,176 +341,80 @@ for idx, msg in enumerate(st.session_state.chat_messages):
 
 
 # =============================================================================
-# CHAT INPUT
+# CHAT INPUT  (locked once assessment is complete)
 # =============================================================================
 
-user_input = st.chat_input("Describe your symptoms...")
-
-if user_input:
-    # --- Add and display the user message ---
-    st.session_state.chat_messages.append(
-        {"role": "user", "content": user_input, "result": None}
+if dialog_state.get("assessment_complete", False):
+    st.info(
+        "✅ Your assessment is complete. "
+        "Use **🔄 Start New Assessment** in the sidebar to begin a new conversation."
     )
-    with st.chat_message("user"):
-        st.markdown(user_input)
+else:
+    user_input = st.chat_input("Describe your symptoms...")
 
-    # --- Run the 3-layer assessment ---
-    with st.chat_message("assistant"):
-        with st.spinner("Analyzing your symptoms..."):
-            result = run_assessment(user_input)
-
-        # -----------------------------------------------------------------
-        # BUILD THE ASSISTANT RESPONSE BASED ON STATUS
-        # -----------------------------------------------------------------
-        response_parts = []
-
-        # ==================== EMERGENCY ====================
-        if result["status"] == "emergency":
-            st.error(f"🚨 **EMERGENCY DETECTED — {result['rule_name']}**")
-            st.markdown(f"**⚠️ {result['action']}**")
-            st.markdown(result["description"])
-            st.markdown(
-                f"**CTAS Level:** {result['ctas_level']} &nbsp;|&nbsp; "
-                f"**Matched symptoms:** {', '.join(result['matched_symptoms'])}"
-            )
-            st.markdown(
-                f"**Urgency:** {urgency_badge('Emergency')}",
-                unsafe_allow_html=True,
-            )
-            st.markdown(URGENCY_GUIDE_HTML, unsafe_allow_html=True)
-
-            response_parts.append(
-                f"🚨 **EMERGENCY DETECTED — {result['rule_name']}**\n\n"
-                f"**⚠️ {result['action']}**\n\n"
-                f"{result['description']}\n\n"
-                f"**CTAS Level:** {result['ctas_level']} &nbsp;|&nbsp; "
-                f"**Matched symptoms:** {', '.join(result['matched_symptoms'])}\n\n"
-                f"**Urgency:** {urgency_badge('Emergency')}\n\n"
-                f"{URGENCY_GUIDE_HTML}"
-            )
-
-        # ==================== ML PREDICTION ====================
-        elif result["status"] == "ml_prediction":
-            # Extracted symptoms
-            st.markdown("**Extracted Symptoms:**")
-            st.markdown(symptom_pills(result["extracted_symptoms"]),
-                        unsafe_allow_html=True)
-
-            # Prediction
-            confidence_pct = f"{result['confidence']:.0%}"
-            st.markdown(
-                f"**Predicted Condition:** {result['predicted_disease']} "
-                f"({confidence_pct} confidence)"
-            )
-
-            # Urgency badge
-            st.markdown(
-                f"**Urgency:** {urgency_badge(result['urgency_level'])}",
-                unsafe_allow_html=True,
-            )
-
-            # Recommendation
-            st.markdown(f"**Recommendation:** {result['recommendation']}")
-
-            # BC Health Resources
-            st.divider()
-            st.markdown("**📞 BC Health Resources**")
-            st.markdown("- **HealthLink BC:** Call **8-1-1** (free health advice, 24/7)")
-            if result["urgency_level"] in ("Emergency", "Urgent"):
-                st.markdown(
-                    "- **Find nearest ER:** "
-                    "[BC Emergency Room Finder]"
-                    "(https://www.healthlinkbc.ca/health-services/search)"
-                )
-            st.markdown(
-                "- Find a walk-in clinic near you on the **Facility Finder** page"
-            )
-            st.markdown(URGENCY_GUIDE_HTML, unsafe_allow_html=True)
-
-            # Store for history
-            response_parts.append(
-                f"**Extracted Symptoms:** {', '.join(result['extracted_symptoms'])}\n\n"
-                f"**Predicted Condition:** {result['predicted_disease']} "
-                f"({confidence_pct} confidence)\n\n"
-                f"**Urgency:** {urgency_badge(result['urgency_level'])}\n\n"
-                f"**Recommendation:** {result['recommendation']}\n\n---\n\n"
-                f"**📞 BC Health Resources**\n"
-                f"- **HealthLink BC:** Call **8-1-1** (free health advice, 24/7)\n"
-                f"- Find a walk-in clinic near you on the **Facility Finder** page\n\n"
-                f"{URGENCY_GUIDE_HTML}"
-            )
-
-        # ==================== OPENAI FALLBACK ====================
-        elif result["status"] == "openai_fallback":
-            # Extracted symptoms
-            st.markdown("**Extracted Symptoms:**")
-            st.markdown(symptom_pills(result["extracted_symptoms"]),
-                        unsafe_allow_html=True)
-
-            st.info(
-                "Our model couldn't make a confident prediction. "
-                "Here's general guidance:"
-            )
-            st.markdown(result["recommendation"])
-
-            # Urgency badge
-            st.markdown(
-                f"**Urgency:** {urgency_badge(result['urgency_level'])}",
-                unsafe_allow_html=True,
-            )
-
-            # BC Health Resources
-            st.divider()
-            st.markdown("**📞 BC Health Resources**")
-            st.markdown("- **HealthLink BC:** Call **8-1-1** (free health advice, 24/7)")
-            if result["urgency_level"] in ("Emergency", "Urgent"):
-                st.markdown(
-                    "- **Find nearest ER:** "
-                    "[BC Emergency Room Finder]"
-                    "(https://www.healthlinkbc.ca/health-services/search)"
-                )
-            st.markdown(
-                "- Find a walk-in clinic near you on the **Facility Finder** page"
-            )
-            st.markdown(URGENCY_GUIDE_HTML, unsafe_allow_html=True)
-
-            # Store for history
-            response_parts.append(
-                f"**Extracted Symptoms:** {', '.join(result['extracted_symptoms'])}\n\n"
-                f"Our model couldn't make a confident prediction. "
-                f"Here's general guidance:\n\n"
-                f"{result['recommendation']}\n\n"
-                f"**Urgency:** {urgency_badge(result['urgency_level'])}\n\n---\n\n"
-                f"**📞 BC Health Resources**\n"
-                f"- **HealthLink BC:** Call **8-1-1** (free health advice, 24/7)\n"
-                f"- Find a walk-in clinic near you on the **Facility Finder** page\n\n"
-                f"{URGENCY_GUIDE_HTML}"
-            )
-
-        # ==================== ERROR ====================
-        elif result["status"] == "error":
-            st.error(f"❌ {result['error']}")
-            response_parts.append(f"❌ {result['error']}")
-
-        # --- Save assistant message to chat history ---
-        assistant_content = "\n\n".join(response_parts)
+    if user_input:
+        # Display the user message immediately
         st.session_state.chat_messages.append(
-            {"role": "assistant", "content": assistant_content, "result": result}
+            {"role": "user", "content": user_input, "result": None}
         )
+        with st.chat_message("user"):
+            st.markdown(user_input)
 
-        # Auto-save emergency results to the database
-        if result["status"] == "emergency":
-            save_assessment(
-                user_id=st.session_state.user_id,
-                symptoms=result["user_input"],
-                extracted_symptoms=result.get(
-                    "extracted_symptoms", result.get("matched_symptoms", [])
-                ),
-                urgency_level="Emergency",
-                recommendation=result["action"],
+        # Run one turn of the multi-turn pipeline
+        with st.chat_message("assistant"):
+            spinner_msg = (
+                "Analyzing your symptoms..."
+                if dialog_state.get("turn_count", 0) >= 2
+                else "Thinking..."
             )
+            with st.spinner(spinner_msg):
+                result = process_multiturn_message(user_input, dialog_state)
 
-        # Rerun so the history loop renders the new message with Save button
+            # ------------------------------------------------------------------
+            # FOLLOW-UP — chatbot needs more information before final assessment
+            # ------------------------------------------------------------------
+            if result["status"] == "follow_up":
+                follow_up_text = result["response"]
+                st.markdown(follow_up_text)
+                st.session_state.chat_messages.append(
+                    {"role": "assistant", "content": follow_up_text, "result": None}
+                )
+
+            # ------------------------------------------------------------------
+            # FINAL ASSESSMENT — emergency, ML prediction, or OpenAI fallback
+            # ------------------------------------------------------------------
+            elif result["status"] in ("emergency", "ml_prediction", "openai_fallback"):
+                rendered_content = render_assessment_result(result)
+                st.session_state.chat_messages.append(
+                    {
+                        "role": "assistant",
+                        "content": rendered_content,
+                        "result": result,
+                    }
+                )
+
+                # Auto-save emergencies immediately
+                if result["status"] == "emergency":
+                    save_assessment(
+                        user_id=st.session_state.user_id,
+                        symptoms=result["user_input"],
+                        extracted_symptoms=result.get(
+                            "extracted_symptoms", result.get("matched_symptoms", [])
+                        ),
+                        urgency_level="Emergency",
+                        recommendation=result["action"],
+                    )
+
+            # ------------------------------------------------------------------
+            # ERROR
+            # ------------------------------------------------------------------
+            elif result["status"] == "error":
+                error_text = f"❌ {result['error']}"
+                st.error(error_text)
+                st.session_state.chat_messages.append(
+                    {"role": "assistant", "content": error_text, "result": None}
+                )
+
         st.rerun()
 
 
