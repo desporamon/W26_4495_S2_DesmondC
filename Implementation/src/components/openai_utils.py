@@ -7,6 +7,7 @@
 # provider for medical concerns. If you are experiencing a medical
 # emergency, call 911 immediately.
 # =============================================================================
+# Sprint 3E: Multi-turn chatbot enhancement
 
 """
 OpenAI API integration for the BC Health Platform Symptom Assessment Chatbot.
@@ -127,6 +128,135 @@ def extract_symptoms(user_input: str) -> dict:
         return {"error": f"OpenAI API error: {e}"}
     except Exception as e:
         return {"error": f"Unexpected error during symptom extraction: {e}"}
+
+
+# =============================================================================
+# MULTI-TURN EXTRACTION — Sprint 3E
+# =============================================================================
+
+# System prompt for multi-turn extraction.  Unlike SYMPTOM_EXTRACTION_PROMPT,
+# this version instructs GPT to look at the FULL conversation and accumulate
+# all symptom information rather than parsing a single message in isolation.
+MULTITURN_EXTRACTION_PROMPT = """You are a medical symptom extraction assistant working in a multi-turn conversation.
+Your job is to review the full conversation history and the latest user message, \
+then extract ALL accumulated symptom information found anywhere in the conversation.
+
+You MUST respond with ONLY valid JSON in this exact format (no extra text):
+{
+    "symptoms": ["symptom1", "symptom2"],
+    "duration": "duration string or unknown",
+    "severity": "mild or moderate or severe",
+    "body_location": "body location string or null"
+}
+
+Rules:
+- "symptoms": a COMPLETE list of ALL distinct symptoms mentioned across the ENTIRE conversation, not just the latest message. Accumulate — do NOT drop symptoms from earlier turns.
+- "duration": how long the patient has had symptoms. Use "unknown" if never mentioned.
+- "severity": infer from context across the full conversation (e.g., "terrible" = severe, "a bit" = mild). Default to "moderate" if unclear.
+- "body_location": where on the body the symptoms are felt (e.g., "chest", "abdomen", "head"). Use null if not mentioned anywhere.
+- Keep symptom names short and clear (e.g., "chest pain", "dizziness", "nausea").
+- Do NOT include any text outside the JSON object."""
+
+
+def extract_symptoms_multiturn(user_input: str, conversation_history: list) -> dict:
+    """
+    Extract structured symptom information accumulated across a multi-turn conversation.
+
+    Unlike extract_symptoms(), this function provides the full conversation history
+    to GPT so that symptoms, duration, severity, and body location mentioned across
+    multiple turns are consolidated into a single structured result.
+
+    Args:
+        user_input: The user's latest message.
+        conversation_history: List of {"role": "user"/"assistant", "content": "..."}
+                              dicts representing the conversation so far (not including
+                              the current user_input turn — that is appended here).
+
+    Returns:
+        A dictionary with:
+        - "symptoms":      list of all accumulated symptom strings
+        - "duration":      duration string (e.g., "3 days") or "unknown"
+        - "severity":      one of "mild", "moderate", or "severe"
+        - "body_location": body location string or None
+        - "raw_response":  the raw GPT response text
+
+        On failure returns {"error": "<error message>"}.
+    """
+    try:
+        messages = [{"role": "system", "content": MULTITURN_EXTRACTION_PROMPT}]
+        messages.extend(conversation_history)
+        messages.append({"role": "user", "content": user_input})
+
+        response = openai.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=0.3,
+            messages=messages,
+        )
+        raw_response = response.choices[0].message.content.strip()
+        parsed = json.loads(raw_response)
+        parsed["raw_response"] = raw_response
+        return parsed
+
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse symptom data from AI response."}
+    except openai.AuthenticationError:
+        return {"error": "Invalid OpenAI API key. Check your secrets.toml configuration."}
+    except openai.RateLimitError:
+        return {"error": "API rate limit reached. Please try again in a moment."}
+    except openai.APIError as e:
+        return {"error": f"OpenAI API error: {e}"}
+    except Exception as e:
+        return {"error": f"Unexpected error during multi-turn symptom extraction: {e}"}
+
+
+def generate_follow_up_response(follow_up_question: str, conversation_history: list) -> str:
+    """
+    Generate a natural, empathetic conversational reply that embeds a follow-up question.
+
+    Takes a slot-filling question (e.g., "How long have you been experiencing
+    these symptoms?") and asks GPT to rephrase it warmly given the conversation
+    context, rather than presenting it as a bare form prompt.
+
+    Args:
+        follow_up_question: The specific question to embed naturally.
+        conversation_history: Full conversation history so far as a list of
+                              {"role": "user"/"assistant", "content": "..."} dicts.
+
+    Returns:
+        A natural-language string for the assistant to display.
+        Falls back to returning follow_up_question as-is if the API call fails.
+
+    Temperature: 0.5 — slightly higher than extraction calls for natural variation.
+    """
+    system_prompt = (
+        "You are a caring health assessment assistant for BC residents. "
+        "Your role is to gather more information about a patient's symptoms "
+        "through natural conversation. "
+        "Ask the follow-up question naturally and empathetically in 2-3 sentences maximum. "
+        "Acknowledge what the patient has already shared before asking your question. "
+        "Do not diagnose. Do not provide medical advice yet."
+    )
+
+    messages = [{"role": "system", "content": system_prompt}]
+    messages.extend(conversation_history)
+    messages.append({
+        "role": "user",
+        "content": (
+            f"[Internal instruction — do not repeat this to the user: "
+            f"Ask the following question naturally and empathetically: {follow_up_question}]"
+        ),
+    })
+
+    try:
+        response = openai.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=0.5,
+            messages=messages,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception:
+        # Graceful degradation: return the raw question if the API call fails
+        return follow_up_question
 
 
 def test_openai_connection() -> bool:
