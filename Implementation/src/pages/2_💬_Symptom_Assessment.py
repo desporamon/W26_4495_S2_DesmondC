@@ -374,11 +374,24 @@ else:
             # FOLLOW-UP — chatbot needs more information before final assessment
             # ------------------------------------------------------------------
             if result["status"] == "follow_up":
-                follow_up_text = result["response"]
-                st.markdown(follow_up_text)
-                st.session_state.chat_messages.append(
-                    {"role": "assistant", "content": follow_up_text, "result": None}
-                )
+                # If no symptoms collected yet, end immediately with redirect
+                if not result.get("collected_symptoms"):
+                    end_text = (
+                        "I'm only able to help with health symptom assessments. "
+                        "Please use **🔄 Start New Assessment** in the sidebar "
+                        "whenever you're ready to describe your symptoms. Take care! 💙"
+                    )
+                    st.markdown(end_text)
+                    dialog_state["assessment_complete"] = True
+                    st.session_state.chat_messages.append(
+                        {"role": "assistant", "content": end_text, "result": None}
+                    )
+                else:
+                    follow_up_text = result["response"]
+                    st.markdown(follow_up_text)
+                    st.session_state.chat_messages.append(
+                        {"role": "assistant", "content": follow_up_text, "result": None}
+                    )
 
             # ------------------------------------------------------------------
             # FINAL ASSESSMENT — emergency, ML prediction, or OpenAI fallback
@@ -409,10 +422,15 @@ else:
             # ERROR
             # ------------------------------------------------------------------
             elif result["status"] == "error":
-                error_text = f"❌ {result['error']}"
-                st.error(error_text)
+                end_text = (
+                    "I'm only able to help with health symptom assessments. "
+                    "Please use **🔄 Start New Assessment** in the sidebar "
+                    "whenever you're ready to describe your symptoms. Take care! 💙"
+                )
+                st.markdown(end_text)
+                dialog_state["assessment_complete"] = True
                 st.session_state.chat_messages.append(
-                    {"role": "assistant", "content": error_text, "result": None}
+                    {"role": "assistant", "content": end_text, "result": None}
                 )
 
         st.rerun()
