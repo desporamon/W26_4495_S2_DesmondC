@@ -414,34 +414,33 @@ if not search_query:
     # =========================================================================
 
     if not sel_cat:
-        section_header(f"📋 All Articles ({len(articles)} found)")
-
-        for row_start in range(0, len(articles), 3):
-            cols = st.columns(3)
-            for j in range(3):
-                a_idx = row_start + j
-                if a_idx >= len(articles):
-                    break
-                a = articles[a_idx]
-                with cols[j]:
-                    st.markdown(
-                        f'<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;'
-                        f'padding:16px;margin-bottom:12px;min-height:180px;">'
-                        f'{badge_pill(a["category"], a["badge_color"])}'
-                        f'<div style="font-weight:700;font-size:0.97em;margin-top:8px;">{a["title"]}</div>'
-                        f'<div style="color:#666;font-size:0.85em;margin-top:6px;line-height:1.5;">'
-                        f'{a["summary"]}</div>'
-                        f'<div style="color:#999;font-size:0.78em;margin-top:8px;">⏱ {a["read_time"]}</div>'
-                        f'</div>',
-                        unsafe_allow_html=True,
-                    )
-                    with st.expander("Read More →"):
-                        st.markdown(a["content"])
+        with st.expander(f"📋 All Articles ({len(articles)} found)", expanded=False):
+            for row_start in range(0, len(articles), 3):
+                cols = st.columns(3)
+                for j in range(3):
+                    a_idx = row_start + j
+                    if a_idx >= len(articles):
+                        break
+                    a = articles[a_idx]
+                    with cols[j]:
                         st.markdown(
-                            f'<a href="{a["source_url"]}" target="_blank" style="color:{_TEAL};'
-                            f'font-weight:600;text-decoration:none;">Visit Source →</a>',
+                            f'<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;'
+                            f'padding:16px;margin-bottom:12px;min-height:180px;">'
+                            f'{badge_pill(a["category"], a["badge_color"])}'
+                            f'<div style="font-weight:700;font-size:0.97em;margin-top:8px;">{a["title"]}</div>'
+                            f'<div style="color:#666;font-size:0.85em;margin-top:6px;line-height:1.5;">'
+                            f'{a["summary"]}</div>'
+                            f'<div style="color:#999;font-size:0.78em;margin-top:8px;">⏱ {a["read_time"]}</div>'
+                            f'</div>',
                             unsafe_allow_html=True,
                         )
+                        with st.expander("Read More →"):
+                            st.markdown(a["content"])
+                            st.markdown(
+                                f'<a href="{a["source_url"]}" target="_blank" style="color:{_TEAL};'
+                                f'font-weight:600;text-decoration:none;">Visit Source →</a>',
+                                unsafe_allow_html=True,
+                            )
 
         st.markdown("<br>", unsafe_allow_html=True)
 
