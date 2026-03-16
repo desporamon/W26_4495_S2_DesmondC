@@ -68,7 +68,7 @@ POPULAR_ICONS = {1: "🏥", 2: "🤕", 3: "🧠", 4: "❤️"}
 def section_header(text: str) -> None:
     st.markdown(
         f'<div style="background-color:{_TEAL};color:white;padding:8px 16px;'
-        f'border-radius:4px;font-size:16px;font-weight:600;margin-bottom:12px;">'
+        f'border-radius:4px;font-size:16px;font-weight:700;letter-spacing:0.01em;margin-bottom:12px;">'
         f'{text}</div>',
         unsafe_allow_html=True,
     )
@@ -133,7 +133,9 @@ div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary {
     color: white;
     border-radius: 4px;
     padding: 8px 16px;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.01em;
 }
 div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary:hover {
     background-color: #155a4d;
@@ -144,7 +146,9 @@ div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary svg 
 }
 div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary span {
     color: white !important;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.01em;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -434,7 +438,7 @@ if not search_query:
     # =========================================================================
 
     if not sel_cat:
-        with st.expander(f"📋 All Articles ({len(articles)} found)", expanded=False):
+        with st.expander(f"📋 **All Articles ({len(articles)} found)**", expanded=False):
             st.markdown('<span class="all-articles-marker"></span>', unsafe_allow_html=True)
             for row_start in range(0, len(articles), 3):
                 cols = st.columns(3)
