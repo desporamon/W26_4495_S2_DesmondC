@@ -43,57 +43,8 @@ if "sa_date_range" not in st.session_state:
 
 _TEAL = "#1a6b5c"
 
-# Four accent colours for the KPI cards (dot + icon circle)
-_KPI_COLORS = ["#1976D2", "#7B1FA2", "#E65100", "#2E7D32"]
-
 st.markdown("""
 <style>
-/* ---- KPI card wrapper ---- */
-.kpi-card {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 20px 18px 16px;
-    position: relative;
-    min-height: 145px;
-}
-.kpi-dot {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-.kpi-icon-circle {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3em;
-    margin-bottom: 10px;
-}
-.kpi-value {
-    font-size: 28px;
-    font-weight: 800;
-    color: #1a1a1a;
-    margin: 0;
-    line-height: 1.2;
-}
-.kpi-label {
-    font-size: 0.88em;
-    font-weight: 600;
-    color: #555;
-    margin-bottom: 2px;
-}
-.kpi-sub {
-    font-size: 0.78em;
-    color: #999;
-    margin-top: 4px;
-}
-
 /* ---- teal section header ---- */
 .sa-section-header {
     background-color: #1a6b5c;
@@ -117,16 +68,16 @@ def section_header(text: str) -> None:
     st.markdown(f'<div class="sa-section-header">{text}</div>', unsafe_allow_html=True)
 
 
-def kpi_card(icon: str, label: str, value: str, subtext: str, color: str) -> str:
-    bg = color + "18"  # low-alpha tint for icon circle
+def kpi_card(icon: str, label: str, value: str, subtext: str) -> str:
     return (
-        f'<div class="kpi-card">'
-        f'<div class="kpi-dot" style="background:{color};"></div>'
-        f'<div class="kpi-icon-circle" style="background:{bg};">{icon}</div>'
-        f'<div class="kpi-label">{label}</div>'
-        f'<div class="kpi-value">{value}</div>'
-        f'<div class="kpi-sub">{subtext}</div>'
-        f'</div>'
+        f'<div style="border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;'
+        f'background:white;box-shadow:0 2px 4px rgba(0,0,0,0.05);">'
+        f'<div style="background:#1a6b5c;color:white;padding:8px 12px;'
+        f'font-weight:600;font-size:14px;">{icon} {label}</div>'
+        f'<div style="padding:16px;">'
+        f'<div style="font-size:28px;font-weight:800;color:#1a1a1a;">{value}</div>'
+        f'<div style="font-size:12px;color:#666;margin-top:4px;">{subtext}</div>'
+        f'</div></div>'
     )
 
 
@@ -219,14 +170,14 @@ avg_duration_min = df["assessment_duration_seconds"].mean() / 60
 kpi_cols = st.columns(4)
 
 kpi_data = [
-    ("👥", "Total Users", f"{total_users:,}", "200 registered patients", _KPI_COLORS[0]),
-    ("👤", "Active This Week", f"{active_this_week:,}", "Unique patients, last 7 days", _KPI_COLORS[1]),
-    ("📋", "Total Assessments", f"{total_assessments:,}", max_date.strftime("%b %d, %Y"), _KPI_COLORS[2]),
-    ("⏱️", "Avg Assessment Time", f"{avg_duration_min:.1f} min", "Average across all assessments", _KPI_COLORS[3]),
+    ("✅", "Total Users", f"{total_users:,}", "200 registered patients"),
+    ("👤", "Active This Week", f"{active_this_week:,}", "Unique patients, last 7 days"),
+    ("📋", "Total Assessments", f"{total_assessments:,}", max_date.strftime("%b %d, %Y")),
+    ("⏱️", "Avg Assessment Time", f"{avg_duration_min:.1f} min", "Average across all assessments"),
 ]
 
-for col, (icon, label, value, sub, color) in zip(kpi_cols, kpi_data):
+for col, (icon, label, value, sub) in zip(kpi_cols, kpi_data):
     with col:
-        st.markdown(kpi_card(icon, label, value, sub, color), unsafe_allow_html=True)
+        st.markdown(kpi_card(icon, label, value, sub), unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
