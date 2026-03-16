@@ -110,21 +110,6 @@ button[kind="primary"]:hover {
     background-color: #1565C0 !important;
     border-color: #1565C0 !important;
 }
-/* popular-chip buttons styled as pills */
-div[data-testid="stHorizontalBlock"] button[kind="secondary"].chip-btn,
-div[data-testid="stHorizontalBlock"] button[data-testid="stBaseButton-secondary"].chip-btn {
-    background: #e8f0fe !important;
-    border: none !important;
-    border-radius: 20px !important;
-    padding: 4px 12px !important;
-    font-size: 0.85rem !important;
-    font-weight: 400 !important;
-    color: #333 !important;
-}
-/* Fallback: style chip buttons via key-based wrapper */
-[data-testid="stBaseButton-secondary"] {
-    /* default secondary stays as-is */
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -147,11 +132,20 @@ st.markdown(
 
 POPULAR_SEARCHES = ["Headache", "Fever", "Back Pain", "Diabetes", "High Blood Pressure"]
 
-search_card = st.container()
-with search_card:
+# Full-width light-blue background band
+st.markdown(
+    '<div style="background:#dceef5;border-radius:12px;padding:32px 0;margin-bottom:24px;">',
+    unsafe_allow_html=True,
+)
+
+# Centre the card in a narrow middle column
+_pad_l, search_center, _pad_r = st.columns([1.5, 3, 1.5])
+
+with search_center:
+    # White card (styled via CSS on the container – see below)
     st.markdown(
-        '<div style="background:white;border:1px solid #e0e0e0;border-radius:10px;'
-        'padding:28px 24px 18px 24px;margin-bottom:24px;">',
+        '<div style="background:white;border-radius:12px;padding:32px;'
+        'box-shadow:0 2px 8px rgba(0,0,0,0.1);">',
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -159,6 +153,7 @@ with search_card:
         unsafe_allow_html=True,
     )
 
+with search_center:
     search_col, btn_col = st.columns([5, 1])
     with search_col:
         search_input = st.text_input(
@@ -173,33 +168,22 @@ with search_card:
             st.session_state.hl_search_query = search_input
             st.rerun()
 
+with search_center:
     # Popular search chips as clickable pill buttons
     st.markdown(
         '<div style="font-size:0.85rem;color:#666;margin-top:4px;margin-bottom:4px;">'
         'Popular searches:</div>',
         unsafe_allow_html=True,
     )
-    chip_cols = st.columns(len(POPULAR_SEARCHES))
+    chip_cols = st.columns(5)
     for i, term in enumerate(POPULAR_SEARCHES):
         with chip_cols[i]:
             if st.button(term, key=f"chip_{term}", use_container_width=True):
                 st.session_state.hl_search_query = term
                 st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Style chip buttons as pills (applied after they render)
-st.markdown("""
-<style>
-""" + "".join(
-    f'button[key="chip_{t}"] {{ background: #e8f0fe !important; border: none !important; '
-    f'border-radius: 20px !important; padding: 4px 12px !important; font-size: 0.85rem !important; }}\n'
-    for t in POPULAR_SEARCHES
-) + """
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
+    # Close the white card div and the blue background div
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
 
 # =============================================================================
