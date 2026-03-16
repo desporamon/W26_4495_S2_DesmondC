@@ -126,6 +126,26 @@ div[data-testid="column"]:has(.search-card-marker) > div[data-testid="stVertical
     padding: 32px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* ---  All Articles expander: teal header bar  --- */
+div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary {
+    background-color: #1a6b5c;
+    color: white;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary:hover {
+    background-color: #155a4d;
+    color: white;
+}
+div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary svg {
+    fill: white;
+}
+div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary span {
+    color: white !important;
+    font-weight: 600;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -415,6 +435,7 @@ if not search_query:
 
     if not sel_cat:
         with st.expander(f"📋 All Articles ({len(articles)} found)", expanded=False):
+            st.markdown('<span class="all-articles-marker"></span>', unsafe_allow_html=True)
             for row_start in range(0, len(articles), 3):
                 cols = st.columns(3)
                 for j in range(3):
