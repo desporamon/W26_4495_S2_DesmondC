@@ -110,6 +110,22 @@ button[kind="primary"]:hover {
     background-color: #1565C0 !important;
     border-color: #1565C0 !important;
 }
+
+/* ---  Search section: light-blue background band  --- */
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.search-band-marker) {
+    background: #dceef5;
+    border-radius: 12px;
+    padding: 32px 0;
+    margin-bottom: 24px;
+}
+
+/* ---  Search section: white card in the centre column  --- */
+div[data-testid="column"]:has(.search-card-marker) > div[data-testid="stVerticalBlockBorderWrapper"] {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -132,58 +148,49 @@ st.markdown(
 
 POPULAR_SEARCHES = ["Headache", "Fever", "Back Pain", "Diabetes", "High Blood Pressure"]
 
-# Full-width light-blue background band
-st.markdown(
-    '<div style="background:#dceef5;border-radius:12px;padding:32px 0;margin-bottom:24px;">',
-    unsafe_allow_html=True,
-)
+# The blue-band background is applied via CSS targeting .search-band-marker
+search_band = st.container()
+with search_band:
+    # Invisible marker so CSS :has() can identify this container
+    st.markdown('<span class="search-band-marker"></span>', unsafe_allow_html=True)
 
-# Centre the card in a narrow middle column
-_pad_l, search_center, _pad_r = st.columns([1.5, 3, 1.5])
+    # Centre the card in a narrow middle column
+    _pad_l, search_center, _pad_r = st.columns([1.5, 3, 1.5])
 
-with search_center:
-    # White card (styled via CSS on the container – see below)
-    st.markdown(
-        '<div style="background:white;border-radius:12px;padding:32px;'
-        'box-shadow:0 2px 8px rgba(0,0,0,0.1);">',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<h3 style="text-align:center;margin-top:0;">Find Health Information</h3>',
-        unsafe_allow_html=True,
-    )
+    with search_center:
+        # Invisible marker so CSS :has() styles this column as the white card
+        st.markdown('<span class="search-card-marker"></span>', unsafe_allow_html=True)
 
-with search_center:
-    search_col, btn_col = st.columns([5, 1])
-    with search_col:
-        search_input = st.text_input(
-            "Search health topics",
-            value=st.session_state.hl_search_query,
-            placeholder="Search health topics... (e.g., headache, fever, back pain)",
-            label_visibility="collapsed",
-            key="hl_search_input",
+        st.markdown(
+            '<h3 style="text-align:center;margin-top:0;">Find Health Information</h3>',
+            unsafe_allow_html=True,
         )
-    with btn_col:
-        if st.button("🔍 Search", type="primary", use_container_width=True):
-            st.session_state.hl_search_query = search_input
-            st.rerun()
 
-with search_center:
-    # Popular search chips as clickable pill buttons
-    st.markdown(
-        '<div style="font-size:0.85rem;color:#666;margin-top:4px;margin-bottom:4px;">'
-        'Popular searches:</div>',
-        unsafe_allow_html=True,
-    )
-    chip_cols = st.columns(5)
-    for i, term in enumerate(POPULAR_SEARCHES):
-        with chip_cols[i]:
-            if st.button(term, key=f"chip_{term}", use_container_width=True):
-                st.session_state.hl_search_query = term
+        search_col, btn_col = st.columns([5, 1])
+        with search_col:
+            search_input = st.text_input(
+                "Search health topics",
+                value=st.session_state.hl_search_query,
+                placeholder="Search health topics... (e.g., headache, fever, back pain)",
+                label_visibility="collapsed",
+                key="hl_search_input",
+            )
+        with btn_col:
+            if st.button("🔍 Search", type="primary", use_container_width=True):
+                st.session_state.hl_search_query = search_input
                 st.rerun()
 
-    # Close the white card div and the blue background div
-    st.markdown('</div></div>', unsafe_allow_html=True)
+        # Popular search chips as clickable pill buttons
+        st.markdown(
+            '<span style="font-size:0.85rem;color:#666;">Popular searches:</span>',
+            unsafe_allow_html=True,
+        )
+        chip_cols = st.columns(5)
+        for i, term in enumerate(POPULAR_SEARCHES):
+            with chip_cols[i]:
+                if st.button(term, key=f"chip_{term}", use_container_width=True):
+                    st.session_state.hl_search_query = term
+                    st.rerun()
 
 
 # =============================================================================
