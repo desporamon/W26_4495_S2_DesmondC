@@ -97,18 +97,18 @@ if "hl_selected_category" not in st.session_state:
 
 st.markdown("""
 <style>
-/* teal primary buttons */
+/* blue primary buttons */
 button[data-testid="stBaseButton-primary"],
 button[kind="primary"] {
-    background-color: #1a6b5c !important;
-    border-color: #1a6b5c !important;
+    background-color: #1976D2 !important;
+    border-color: #1976D2 !important;
     border-radius: 24px !important;
     font-weight: 600 !important;
 }
 button[data-testid="stBaseButton-primary"]:hover,
 button[kind="primary"]:hover {
-    background-color: #145a4c !important;
-    border-color: #145a4c !important;
+    background-color: #1565C0 !important;
+    border-color: #1565C0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -130,48 +130,46 @@ st.markdown(
 # SECTION 1 — FIND HEALTH INFORMATION (search bar)
 # =============================================================================
 
-st.markdown(
-    '<div style="background:#f0f7ff;border:1px solid #c8deff;border-radius:10px;'
-    'padding:28px 24px 18px 24px;margin-bottom:24px;">'
-    '<div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:14px;">'
-    'Find Health Information</div></div>',
-    unsafe_allow_html=True,
-)
-
-# We render the inputs outside the HTML div (Streamlit can't nest widgets in markdown)
-# but visually it appears continuous because of spacing
-
-search_col, btn_col = st.columns([5, 1])
-
-with search_col:
-    search_input = st.text_input(
-        "Search health topics",
-        value=st.session_state.hl_search_query,
-        placeholder="Search health topics... (e.g., headache, fever, back pain)",
-        label_visibility="collapsed",
-        key="hl_search_input",
-    )
-
-with btn_col:
-    if st.button("🔍 Search", type="primary", use_container_width=True):
-        st.session_state.hl_search_query = search_input
-        st.rerun()
-
-# Popular search chips
 POPULAR_SEARCHES = ["Headache", "Fever", "Back Pain", "Diabetes", "High Blood Pressure"]
 
-chip_cols = st.columns([1.2] + [1] * len(POPULAR_SEARCHES))
-with chip_cols[0]:
+search_card = st.container()
+with search_card:
     st.markdown(
-        '<div style="font-size:0.85rem;color:#666;padding-top:6px;">Popular searches:</div>',
+        '<div style="background:white;border:1px solid #e0e0e0;border-radius:10px;'
+        'padding:28px 24px 18px 24px;margin-bottom:24px;">',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<h3 style="text-align:center;margin-top:0;">Find Health Information</h3>',
         unsafe_allow_html=True,
     )
 
-for i, term in enumerate(POPULAR_SEARCHES):
-    with chip_cols[i + 1]:
-        if st.button(term, key=f"chip_{term}", use_container_width=True):
-            st.session_state.hl_search_query = term
+    search_col, btn_col = st.columns([5, 1])
+    with search_col:
+        search_input = st.text_input(
+            "Search health topics",
+            value=st.session_state.hl_search_query,
+            placeholder="Search health topics... (e.g., headache, fever, back pain)",
+            label_visibility="collapsed",
+            key="hl_search_input",
+        )
+    with btn_col:
+        if st.button("🔍 Search", type="primary", use_container_width=True):
+            st.session_state.hl_search_query = search_input
             st.rerun()
+
+    # Popular search chips as inline pill badges
+    chips_html = '<div style="margin-top:4px;"><span style="font-size:0.85rem;color:#666;margin-right:8px;">Popular searches:</span>'
+    for term in POPULAR_SEARCHES:
+        chips_html += (
+            f'<span style="background:#e8f0fe;padding:4px 12px;border-radius:20px;'
+            f'font-size:0.85rem;margin-right:6px;display:inline-block;margin-bottom:4px;">'
+            f'{term}</span>'
+        )
+    chips_html += '</div>'
+    st.markdown(chips_html, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -180,7 +178,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 # SECTION 2 — BROWSE BY CATEGORY
 # =============================================================================
 
-section_header("📂 Browse by Category")
+st.markdown("### Browse by Category")
 st.markdown(
     '<div style="color:#666;font-size:0.9rem;margin-bottom:14px;">'
     'Explore health topics organized by condition and specialty</div>',
@@ -195,24 +193,11 @@ row2 = st.columns(4)
 for idx, cat in enumerate(CATEGORIES):
     col = row1[idx] if idx < 4 else row2[idx - 4]
     with col:
-        if st.button(
-            f"{cat['icon']}  {cat['name']}",
-            key=f"cat_{cat['name']}",
-            use_container_width=True,
-        ):
-            # Toggle: clicking same category clears the filter
-            if st.session_state.hl_selected_category == cat["name"]:
-                st.session_state.hl_selected_category = None
-            else:
-                st.session_state.hl_selected_category = cat["name"]
-            st.rerun()
-
-        # Card visual below the button
         selected = st.session_state.hl_selected_category == cat["name"]
         border_style = f"border:2px solid {_TEAL};" if selected else "border:1px solid #e0e0e0;"
         st.markdown(
             f'<div style="background:white;{border_style}border-radius:8px;'
-            f'padding:16px;text-align:center;margin-top:-10px;margin-bottom:12px;">'
+            f'padding:16px;text-align:center;margin-bottom:4px;">'
             f'<div style="background:{cat["bg"]};width:52px;height:52px;border-radius:50%;'
             f'display:inline-flex;align-items:center;justify-content:center;font-size:1.5em;'
             f'margin-bottom:8px;">{cat["icon"]}</div>'
@@ -221,6 +206,13 @@ for idx, cat in enumerate(CATEGORIES):
             f'</div>',
             unsafe_allow_html=True,
         )
+        btn_label = "✓ Selected" if selected else "Select"
+        if st.button(btn_label, key=f"cat_{cat['name']}", use_container_width=True):
+            if selected:
+                st.session_state.hl_selected_category = None
+            else:
+                st.session_state.hl_selected_category = cat["name"]
+            st.rerun()
 
 st.markdown("<br>", unsafe_allow_html=True)
 
