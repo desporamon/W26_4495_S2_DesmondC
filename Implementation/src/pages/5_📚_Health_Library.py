@@ -110,6 +110,21 @@ button[kind="primary"]:hover {
     background-color: #1565C0 !important;
     border-color: #1565C0 !important;
 }
+/* popular-chip buttons styled as pills */
+div[data-testid="stHorizontalBlock"] button[kind="secondary"].chip-btn,
+div[data-testid="stHorizontalBlock"] button[data-testid="stBaseButton-secondary"].chip-btn {
+    background: #e8f0fe !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 4px 12px !important;
+    font-size: 0.85rem !important;
+    font-weight: 400 !important;
+    color: #333 !important;
+}
+/* Fallback: style chip buttons via key-based wrapper */
+[data-testid="stBaseButton-secondary"] {
+    /* default secondary stays as-is */
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -158,186 +173,248 @@ with search_card:
             st.session_state.hl_search_query = search_input
             st.rerun()
 
-    # Popular search chips as inline pill badges
-    chips_html = '<div style="margin-top:4px;"><span style="font-size:0.85rem;color:#666;margin-right:8px;">Popular searches:</span>'
-    for term in POPULAR_SEARCHES:
-        chips_html += (
-            f'<span style="background:#e8f0fe;padding:4px 12px;border-radius:20px;'
-            f'font-size:0.85rem;margin-right:6px;display:inline-block;margin-bottom:4px;">'
-            f'{term}</span>'
-        )
-    chips_html += '</div>'
-    st.markdown(chips_html, unsafe_allow_html=True)
+    # Popular search chips as clickable pill buttons
+    st.markdown(
+        '<div style="font-size:0.85rem;color:#666;margin-top:4px;margin-bottom:4px;">'
+        'Popular searches:</div>',
+        unsafe_allow_html=True,
+    )
+    chip_cols = st.columns(len(POPULAR_SEARCHES))
+    for i, term in enumerate(POPULAR_SEARCHES):
+        with chip_cols[i]:
+            if st.button(term, key=f"chip_{term}", use_container_width=True):
+                st.session_state.hl_search_query = term
+                st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+# Style chip buttons as pills (applied after they render)
+st.markdown("""
+<style>
+""" + "".join(
+    f'button[key="chip_{t}"] {{ background: #e8f0fe !important; border: none !important; '
+    f'border-radius: 20px !important; padding: 4px 12px !important; font-size: 0.85rem !important; }}\n'
+    for t in POPULAR_SEARCHES
+) + """
+</style>
+""", unsafe_allow_html=True)
+
 st.markdown("<br>", unsafe_allow_html=True)
 
 
 # =============================================================================
-# SECTION 2 — BROWSE BY CATEGORY
+# SEARCH RESULTS BLOCK
 # =============================================================================
 
-st.markdown("### Browse by Category")
-st.markdown(
-    '<div style="color:#666;font-size:0.9rem;margin-bottom:14px;">'
-    'Explore health topics organized by condition and specialty</div>',
-    unsafe_allow_html=True,
-)
+search_query = st.session_state.hl_search_query.strip()
 
-# Row 1
-row1 = st.columns(4)
-# Row 2
-row2 = st.columns(4)
+if search_query:
+    q_lower = search_query.lower()
+    search_results = [
+        a for a in articles
+        if q_lower in a["title"].lower()
+        or q_lower in a["category"].lower()
+        or q_lower in a["summary"].lower()
+        or any(q_lower in t.lower() for t in a.get("tags", []))
+    ]
 
-for idx, cat in enumerate(CATEGORIES):
-    col = row1[idx] if idx < 4 else row2[idx - 4]
-    with col:
-        selected = st.session_state.hl_selected_category == cat["name"]
-        border_style = f"border:2px solid {_TEAL};" if selected else "border:1px solid #e0e0e0;"
+    # Header row with result count and clear button
+    res_header_col, clear_col = st.columns([5, 1])
+    with res_header_col:
         st.markdown(
-            f'<div style="background:white;{border_style}border-radius:8px;'
-            f'padding:16px;text-align:center;margin-bottom:4px;">'
-            f'<div style="background:{cat["bg"]};width:52px;height:52px;border-radius:50%;'
-            f'display:inline-flex;align-items:center;justify-content:center;font-size:1.5em;'
-            f'margin-bottom:8px;">{cat["icon"]}</div>'
-            f'<div style="font-weight:700;font-size:0.95em;">{cat["name"]}</div>'
-            f'<div style="color:#888;font-size:0.8em;margin-top:4px;">{cat["desc"]}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
+            f"### Search Results for '{search_query}' ({len(search_results)} articles found)"
         )
-        btn_label = "✓ Selected" if selected else "Select"
-        if st.button(btn_label, key=f"cat_{cat['name']}", use_container_width=True):
-            if selected:
-                st.session_state.hl_selected_category = None
-            else:
-                st.session_state.hl_selected_category = cat["name"]
+    with clear_col:
+        if st.button("Clear Search", type="primary", use_container_width=True):
+            st.session_state.hl_search_query = ""
             st.rerun()
 
-st.markdown("<br>", unsafe_allow_html=True)
+    if not search_results:
+        st.info(
+            f"No articles found for '{search_query}'. "
+            "Try a different term or browse by category below."
+        )
+    else:
+        for row_start in range(0, len(search_results), 3):
+            cols = st.columns(3)
+            for j in range(3):
+                idx = row_start + j
+                if idx >= len(search_results):
+                    break
+                a = search_results[idx]
+                with cols[j]:
+                    st.markdown(
+                        f'<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;'
+                        f'padding:16px;margin-bottom:12px;min-height:180px;">'
+                        f'{badge_pill(a["category"], a["badge_color"])}'
+                        f'<div style="font-weight:700;font-size:0.97em;margin-top:8px;">{a["title"]}</div>'
+                        f'<div style="color:#666;font-size:0.85em;margin-top:6px;line-height:1.5;">'
+                        f'{a["summary"]}</div>'
+                        f'<div style="color:#999;font-size:0.78em;margin-top:8px;">⏱ {a["read_time"]}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                    with st.expander("Read More →"):
+                        st.markdown(a["content"])
+                        st.markdown(
+                            f'<a href="{a["source_url"]}" target="_blank" style="color:{_TEAL};'
+                            f'font-weight:600;text-decoration:none;">Visit Source →</a>',
+                            unsafe_allow_html=True,
+                        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
 
 # =============================================================================
-# SECTION 3 — POPULAR TOPICS (always shown, IDs 1-4)
+# DEFAULT VIEW — BROWSE BY CATEGORY, POPULAR TOPICS, ALL ARTICLES
 # =============================================================================
 
-section_header("🔥 Popular Topics")
+if not search_query:
 
-popular = [a for a in articles if a["id"] in (1, 2, 3, 4)]
-popular.sort(key=lambda a: a["id"])
+    # =========================================================================
+    # SECTION 2 — BROWSE BY CATEGORY
+    # =========================================================================
 
-pop_row1 = st.columns(2)
-pop_row2 = st.columns(2)
-pop_cols = [pop_row1[0], pop_row1[1], pop_row2[0], pop_row2[1]]
+    st.markdown("### Browse by Category")
+    st.markdown(
+        '<div style="color:#666;font-size:0.9rem;margin-bottom:14px;">'
+        'Explore health topics organized by condition and specialty</div>',
+        unsafe_allow_html=True,
+    )
 
-for i, article in enumerate(popular):
-    with pop_cols[i]:
-        banner = article.get("banner_color", "#1565C0")
-        icon = article.get("icon", POPULAR_ICONS.get(article["id"], "📄"))
+    # Row 1
+    row1 = st.columns(4)
+    # Row 2
+    row2 = st.columns(4)
 
-        # Banner with icon
-        st.markdown(
-            f'<div style="background:{banner};border-radius:8px 8px 0 0;height:160px;'
-            f'display:flex;align-items:center;justify-content:center;">'
-            f'<span style="font-size:3.5em;color:rgba(255,255,255,0.85);">{icon}</span>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
-        # Card body
-        st.markdown(
-            f'<div style="background:white;border:1px solid #e0e0e0;border-top:none;'
-            f'border-radius:0 0 8px 8px;padding:16px;margin-bottom:16px;">'
-            f'{badge_pill(article["category"], article["badge_color"])}'
-            f'<div style="font-weight:700;font-size:1.05em;margin-top:8px;">{article["title"]}</div>'
-            f'<div style="color:#666;font-size:0.88em;margin-top:6px;line-height:1.5;">{article["summary"]}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
-        with st.expander("Read More →"):
-            st.markdown(article["content"])
+    for idx, cat in enumerate(CATEGORIES):
+        col = row1[idx] if idx < 4 else row2[idx - 4]
+        with col:
+            selected = st.session_state.hl_selected_category == cat["name"]
+            border_style = f"border:2px solid {_TEAL};" if selected else "border:1px solid #e0e0e0;"
             st.markdown(
-                f'<a href="{article["source_url"]}" target="_blank" style="color:{_TEAL};'
-                f'font-weight:600;text-decoration:none;">Visit Source →</a>',
+                f'<div style="background:white;{border_style}border-radius:8px;'
+                f'padding:16px;text-align:center;margin-bottom:4px;">'
+                f'<div style="background:{cat["bg"]};width:52px;height:52px;border-radius:50%;'
+                f'display:inline-flex;align-items:center;justify-content:center;font-size:1.5em;'
+                f'margin-bottom:8px;">{cat["icon"]}</div>'
+                f'<div style="font-weight:700;font-size:0.95em;">{cat["name"]}</div>'
+                f'<div style="color:#888;font-size:0.8em;margin-top:4px;">{cat["desc"]}</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            btn_label = "✓ Selected" if selected else "Select"
+            if st.button(btn_label, key=f"cat_{cat['name']}", use_container_width=True):
+                if selected:
+                    st.session_state.hl_selected_category = None
+                else:
+                    st.session_state.hl_selected_category = cat["name"]
+                st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # =========================================================================
+    # SECTION 3 — POPULAR TOPICS (IDs 1-4)
+    # =========================================================================
+
+    section_header("🔥 Popular Topics")
+
+    popular = [a for a in articles if a["id"] in (1, 2, 3, 4)]
+    popular.sort(key=lambda a: a["id"])
+
+    pop_row1 = st.columns(2)
+    pop_row2 = st.columns(2)
+    pop_cols = [pop_row1[0], pop_row1[1], pop_row2[0], pop_row2[1]]
+
+    for i, article in enumerate(popular):
+        with pop_cols[i]:
+            banner = article.get("banner_color", "#1565C0")
+            icon = article.get("icon", POPULAR_ICONS.get(article["id"], "📄"))
+
+            # Banner with icon
+            st.markdown(
+                f'<div style="background:{banner};border-radius:8px 8px 0 0;height:160px;'
+                f'display:flex;align-items:center;justify-content:center;">'
+                f'<span style="font-size:3.5em;color:rgba(255,255,255,0.85);">{icon}</span>'
+                f'</div>',
                 unsafe_allow_html=True,
             )
 
-st.markdown("<br>", unsafe_allow_html=True)
+            # Card body
+            st.markdown(
+                f'<div style="background:white;border:1px solid #e0e0e0;border-top:none;'
+                f'border-radius:0 0 8px 8px;padding:16px;margin-bottom:16px;">'
+                f'{badge_pill(article["category"], article["badge_color"])}'
+                f'<div style="font-weight:700;font-size:1.05em;margin-top:8px;">{article["title"]}</div>'
+                f'<div style="color:#666;font-size:0.88em;margin-top:6px;line-height:1.5;">{article["summary"]}</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
 
-
-# =============================================================================
-# SECTION 4 — ALL ARTICLES (filterable)
-# =============================================================================
-
-# Apply filters
-filtered_articles = list(articles)
-
-query = st.session_state.hl_search_query.strip().lower()
-sel_cat = st.session_state.hl_selected_category
-
-if query:
-    filtered_articles = [
-        a for a in filtered_articles
-        if query in a["title"].lower()
-        or query in a["summary"].lower()
-        or any(query in t.lower() for t in a.get("tags", []))
-    ]
-
-if sel_cat:
-    filtered_articles = [a for a in filtered_articles if a["category"] == sel_cat]
-
-section_header(f"📋 All Articles ({len(filtered_articles)} found)")
-
-# Show active filters
-if query or sel_cat:
-    filter_parts = []
-    if query:
-        filter_parts.append(f'Search: **{st.session_state.hl_search_query}**')
-    if sel_cat:
-        filter_parts.append(f'Category: **{sel_cat}**')
-    filter_msg_col, clear_col = st.columns([5, 1])
-    with filter_msg_col:
-        st.markdown("Filters: " + " · ".join(filter_parts))
-    with clear_col:
-        if st.button("Clear Filters", use_container_width=True):
-            st.session_state.hl_search_query = ""
-            st.session_state.hl_selected_category = None
-            st.rerun()
-
-if not filtered_articles:
-    st.info(
-        "No articles match your search. Try a different term or clear your filters."
-    )
-else:
-    for row_start in range(0, len(filtered_articles), 3):
-        cols = st.columns(3)
-        for j in range(3):
-            idx = row_start + j
-            if idx >= len(filtered_articles):
-                break
-            a = filtered_articles[idx]
-            with cols[j]:
+            with st.expander("Read More →"):
+                st.markdown(article["content"])
                 st.markdown(
-                    f'<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;'
-                    f'padding:16px;margin-bottom:12px;min-height:180px;">'
-                    f'{badge_pill(a["category"], a["badge_color"])}'
-                    f'<div style="font-weight:700;font-size:0.97em;margin-top:8px;">{a["title"]}</div>'
-                    f'<div style="color:#666;font-size:0.85em;margin-top:6px;line-height:1.5;">'
-                    f'{a["summary"]}</div>'
-                    f'<div style="color:#999;font-size:0.78em;margin-top:8px;">⏱ {a["read_time"]}</div>'
-                    f'</div>',
+                    f'<a href="{article["source_url"]}" target="_blank" style="color:{_TEAL};'
+                    f'font-weight:600;text-decoration:none;">Visit Source →</a>',
                     unsafe_allow_html=True,
                 )
-                with st.expander("Read More →"):
-                    st.markdown(a["content"])
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # =========================================================================
+    # SECTION 4 — ALL ARTICLES (filterable by category)
+    # =========================================================================
+
+    filtered_articles = list(articles)
+    sel_cat = st.session_state.hl_selected_category
+
+    if sel_cat:
+        filtered_articles = [a for a in filtered_articles if a["category"] == sel_cat]
+
+    section_header(f"📋 All Articles ({len(filtered_articles)} found)")
+
+    if sel_cat:
+        filter_msg_col, clear_col = st.columns([5, 1])
+        with filter_msg_col:
+            st.markdown(f'Filters: Category: **{sel_cat}**')
+        with clear_col:
+            if st.button("Clear Filters", use_container_width=True):
+                st.session_state.hl_selected_category = None
+                st.rerun()
+
+    if not filtered_articles:
+        st.info(
+            "No articles match your filter. Try a different category or clear your filters."
+        )
+    else:
+        for row_start in range(0, len(filtered_articles), 3):
+            cols = st.columns(3)
+            for j in range(3):
+                a_idx = row_start + j
+                if a_idx >= len(filtered_articles):
+                    break
+                a = filtered_articles[a_idx]
+                with cols[j]:
                     st.markdown(
-                        f'<a href="{a["source_url"]}" target="_blank" style="color:{_TEAL};'
-                        f'font-weight:600;text-decoration:none;">Visit Source →</a>',
+                        f'<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;'
+                        f'padding:16px;margin-bottom:12px;min-height:180px;">'
+                        f'{badge_pill(a["category"], a["badge_color"])}'
+                        f'<div style="font-weight:700;font-size:0.97em;margin-top:8px;">{a["title"]}</div>'
+                        f'<div style="color:#666;font-size:0.85em;margin-top:6px;line-height:1.5;">'
+                        f'{a["summary"]}</div>'
+                        f'<div style="color:#999;font-size:0.78em;margin-top:8px;">⏱ {a["read_time"]}</div>'
+                        f'</div>',
                         unsafe_allow_html=True,
                     )
+                    with st.expander("Read More →"):
+                        st.markdown(a["content"])
+                        st.markdown(
+                            f'<a href="{a["source_url"]}" target="_blank" style="color:{_TEAL};'
+                            f'font-weight:600;text-decoration:none;">Visit Source →</a>',
+                            unsafe_allow_html=True,
+                        )
 
-st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
 
 # =============================================================================
