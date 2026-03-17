@@ -13,6 +13,13 @@ import plotly.graph_objects as go
 import streamlit as st
 from components.auth import require_authentication
 
+try:
+    from sklearn.cluster import KMeans
+    from sklearn.preprocessing import StandardScaler
+    _HAS_SKLEARN = True
+except ImportError:
+    _HAS_SKLEARN = False
+
 
 # =============================================================================
 # PAGE PROTECTION
@@ -428,3 +435,105 @@ fig_trend.update_layout(
 st.plotly_chart(fig_trend, use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
+
+
+# =============================================================================
+# K-MEANS CLUSTERING SECTION
+# =============================================================================
+
+section_header("🔬 Patient Cluster Analysis (K-Means)")
+
+st.markdown(
+    '<div style="color:#555;font-size:0.9rem;margin-bottom:14px;">'
+    "Unsupervised K-Means clustering automatically groups patients by age and "
+    "assessment patterns to identify natural health behaviour segments.</div>",
+    unsafe_allow_html=True,
+)
+
+if not _HAS_SKLEARN:
+    st.warning("scikit-learn not installed. Run: `pip install scikit-learn`")
+    st.stop()
+
+_SERIOUS_SYMPTOMS = {"chest pain", "shortness of breath", "high blood pressure", "diabetes symptoms"}
+
+if df["patient_id"].nunique() < 10:
+    st.info("Not enough data for clustering. Select a wider date range.")
+else:
+    # --- aggregate per patient ---
+    patient_agg = df.groupby("patient_id").agg(
+        mean_age=("age", "mean"),
+        assessment_count=("patient_id", "size"),
+        urgent_ratio=("urgency_level", lambda x: (x.isin(["Urgent", "Emergency"])).mean()),
+        chronic_ratio=("symptom", lambda x: x.isin(_SERIOUS_SYMPTOMS).mean()),
+    ).reset_index()
+
+    # --- standardise & cluster ---
+    features = ["mean_age", "assessment_count", "urgent_ratio", "chronic_ratio"]
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(patient_agg[features])
+
+    kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+    patient_agg["cluster"] = kmeans.fit_predict(X_scaled)
+
+    # --- name clusters by combined chronic_ratio + urgent_ratio ---
+    cluster_scores = (
+        patient_agg.groupby("cluster")[["chronic_ratio", "urgent_ratio"]]
+        .mean()
+        .sum(axis=1)
+        .sort_values(ascending=False)
+    )
+    _CLUSTER_NAMES = ["Chronic/Elderly Patients", "High-Risk Patients", "Healthy/Occasional Users"]
+    cluster_name_map = {cid: name for cid, name in zip(cluster_scores.index, _CLUSTER_NAMES)}
+    patient_agg["cluster_name"] = patient_agg["cluster"].map(cluster_name_map)
+
+    _CLUSTER_COLORS = {
+        "Chronic/Elderly Patients": "#dc3545",
+        "High-Risk Patients": "#ffc107",
+        "Healthy/Occasional Users": "#1976D2",
+    }
+
+    # --- scatter plot ---
+    fig_cluster = px.scatter(
+        patient_agg,
+        x="assessment_count",
+        y="urgent_ratio",
+        color="cluster_name",
+        size="mean_age",
+        color_discrete_map=_CLUSTER_COLORS,
+        hover_data=["mean_age", "assessment_count", "urgent_ratio", "chronic_ratio"],
+        labels={
+            "assessment_count": "Assessment Frequency",
+            "urgent_ratio": "Urgent Case Ratio",
+            "cluster_name": "Cluster",
+            "mean_age": "Age",
+        },
+        title="Patient Segments by Assessment Frequency and Urgency Profile",
+    )
+    fig_cluster.update_layout(
+        **_CHART_LAYOUT,
+        height=450,
+    )
+    st.plotly_chart(fig_cluster, use_container_width=True)
+
+    # --- summary cards ---
+    cluster_cols = st.columns(3)
+    for col, name in zip(cluster_cols, _CLUSTER_NAMES):
+        grp = patient_agg[patient_agg["cluster_name"] == name]
+        if grp.empty:
+            continue
+        with col:
+            st.markdown(
+                f'<div style="border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;'
+                f'background:white;box-shadow:0 2px 4px rgba(0,0,0,0.05);">'
+                f'<div style="background:#1a6b5c;color:white;padding:8px 12px;'
+                f'font-weight:600;font-size:14px;">{name}</div>'
+                f'<div style="padding:16px;line-height:1.9;font-size:0.92em;">'
+                f'<div>👥 {len(grp)} patients</div>'
+                f'<div>🎂 Avg age: {grp["mean_age"].mean():.0f}</div>'
+                f'<div>📋 Avg assessments: {grp["assessment_count"].mean():.1f}</div>'
+                f'<div>⚠️ Urgent ratio: {grp["urgent_ratio"].mean() * 100:.1f}%</div>'
+                f'</div></div>',
+                unsafe_allow_html=True,
+            )
+
+    st.markdown("<br>", unsafe_allow_html=True)
