@@ -221,8 +221,8 @@ _SYMPTOM_COLOR = {
     "cough": "#ffc107",
     "sore throat": "#ffc107",
 }
-# Everything else defaults to teal
-_SYMPTOM_DEFAULT_COLOR = _TEAL
+# Everything else defaults to blue (General)
+_SYMPTOM_DEFAULT_COLOR = "#1976D2"
 
 symptom_counts = (
     df["symptom"]
