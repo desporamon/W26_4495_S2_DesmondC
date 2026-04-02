@@ -7,7 +7,11 @@ It handles user authentication (login/register) and session management.
 Redesigned to match UI mockups with centered card-like layout.
 """
 
+import base64
+import pathlib
+
 import streamlit as st
+import streamlit.components.v1 as components
 
 # Import database functions for user management
 from components.database import (
@@ -34,8 +38,8 @@ from components.header import render_header, inject_global_css, hide_sidebar, ge
 # =============================================================================
 
 st.set_page_config(
-    page_title="BC Health Platform",
-    page_icon="🏥",
+    page_title="CedarCare",
+    page_icon="🌲",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -104,6 +108,10 @@ def init_session_state():
     # Store the logged-in user's email
     if 'user_email' not in st.session_state:
         st.session_state.user_email = None
+
+    # Track whether to show login form or landing page
+    if 'show_login' not in st.session_state:
+        st.session_state.show_login = False
 
 
 def logout():
@@ -528,6 +536,123 @@ def show_auth_view():
 # MAIN APPLICATION
 # =============================================================================
 
+def show_landing_page():
+    """
+    Display the CedarCare marketing landing page.
+    Shown to unauthenticated users before they reach login.
+    Loads the pre-built HTML file and injects the real logo.
+    """
+    # Handle query param trigger from iframe postMessage
+    if st.query_params.get('show_login') == 'true':
+        st.query_params.clear()
+        st.session_state.show_login = True
+        st.rerun()
+
+    st.markdown("""<style>
+        #MainMenu, header, footer,
+        .stAppDeployButton { display: none !important }
+        .stMain .block-container {
+            padding: 0 !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+        }
+        [data-testid="stMain"] {
+            padding: 0 !important;
+        }
+        [data-testid="block-container"] {
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+        .stMainBlockContainer {
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+        iframe {
+            display: block !important;
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+        .stApp {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        [data-testid="stAppViewContainer"] {
+            padding: 0 !important;
+        }
+        [data-testid="stVerticalBlock"] {
+            padding: 0 !important;
+            gap: 0 !important;
+        }
+    </style>""", unsafe_allow_html=True)
+
+    logo_path = pathlib.Path(__file__).parent / "assets" / "logo.png"
+    logo_uri = (
+        "data:image/png;base64,"
+        + base64.b64encode(logo_path.read_bytes()).decode()
+    )
+
+    html = pathlib.Path(__file__).parent / "cedarcare_landing_final_with_logo_2Apr2026.html"
+    html = html.read_text(encoding="utf-8")
+
+    html = html.replace(
+        '<div class="logo-mark">',
+        (
+            f'<img src="{logo_uri}" '
+            f'style="width:34px;height:auto;object-fit:contain;'
+            f'flex-shrink:0" alt="CedarCare"/>'
+            f'<div class="logo-mark" style="display:none">'
+        )
+    )
+
+    html = html.replace(
+        '<span class="logo-name">CedarCare</span>',
+        (
+            '<span class="logo-name">'
+            '<strong style="color:#006271;font-weight:600">'
+            'Cedar</strong>'
+            '<span style="color:#009793;font-weight:400">'
+            'Care</span>'
+            '</span>'
+        )
+    )
+
+    old_avatar = (
+        '<div class="av av-ai"><svg width="14" height="14" '
+        'viewBox="0 0 18 18" fill="none"><path d="M9 2C9 2 6 4.5 '
+        '6 9C6 12.5 7.5 15 9 16C10.5 15 12 12.5 12 9C12 4.5 9 2 '
+        '9 2Z" fill="#D4EFFC"/><line x1="9" y1="5" x2="9" y2="16"'
+        ' stroke="white" stroke-width="1.5" stroke-linecap="round"'
+        '/></svg></div>'
+    )
+    new_avatar = (
+        f'<div class="av av-ai">'
+        f'<img src="{logo_uri}" '
+        f'style="width:16px;height:auto;object-fit:contain;'
+        f'filter:brightness(0) invert(1)"/>'
+        f'</div>'
+    )
+    html = html.replace(old_avatar, new_avatar)
+
+    # Add login links to all CTA buttons
+    html = html.replace(
+        '<button class="btn-p">Get started free</button>',
+        '<a href="?show_login=true" style="text-decoration:none">'
+        '<button class="btn-p">Get started free</button></a>'
+    )
+    html = html.replace(
+        '<button class="nav-cta">Sign in</button>',
+        '<a href="?show_login=true" style="text-decoration:none">'
+        '<button class="nav-cta">Sign in</button></a>'
+    )
+    html = html.replace(
+        '<button class="btn-white">Create your free account</button>',
+        '<a href="?show_login=true" style="text-decoration:none">'
+        '<button class="btn-white">Create your free account</button></a>'
+    )
+
+    components.html(html, height=1920, scrolling=False)
+
+
 def main():
     """
     Main application entry point.
@@ -545,11 +670,15 @@ def main():
     # -----------------------------------------
 
     if not st.session_state.authenticated:
-        # User is NOT logged in - hide sidebar and show login/register
         hide_sidebar()
-        show_auth_view()
+        if st.session_state.get('show_login', False):
+            if st.button("← Back to home", type="secondary"):
+                st.session_state.show_login = False
+                st.rerun()
+            show_auth_view()
+        else:
+            show_landing_page()
     else:
-        # User IS logged in - redirect to Home dashboard
         st.switch_page("pages/1_🏠_Home.py")
 
 
