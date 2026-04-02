@@ -432,13 +432,13 @@ def get_follow_up_question(dialog_state: dict):
             "For example, what exactly are you feeling and where?"
         )
 
-    # Slot 2: symptoms known, duration missing
+    # Slot 2: always ask severity explicitly on turn 1
+    if turn_count == 1:
+        return "How severe are your symptoms?"
+
+    # Slot 3: symptoms known, duration missing
     if not dialog_state.get("duration"):
         return "How long have you been experiencing these symptoms?"
-
-    # Slot 3: symptoms known, severity missing
-    if not dialog_state.get("severity"):
-        return "On a scale of 1 to 10, how would you rate the severity of your symptoms?"
 
     # Slot 4: body location missing and at least one symptom is pain-related
     if not dialog_state.get("body_location"):

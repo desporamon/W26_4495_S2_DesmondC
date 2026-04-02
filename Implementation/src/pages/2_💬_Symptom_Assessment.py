@@ -168,17 +168,16 @@ with st.sidebar:
 # PAGE HEADER
 # =============================================================================
 
-st.title("💬 Symptom Assessment Chatbot")
-
-st.warning(
-    "**Important Disclaimer:** "
-    "This tool provides general health information only. It is NOT a substitute "
-    "for professional medical advice, diagnosis, or treatment. If you are "
-    "experiencing a medical emergency, please call **911** or go to your "
-    "nearest emergency room."
-)
-
-st.divider()
+st.markdown("""
+<div style="background:#fffbeb;border-left:4px solid #f59e0b;
+border-bottom:1px solid #fde68a;padding:12px 24px;
+margin:-1rem -1rem 1rem -1rem;font-size:14px;color:#78560a;line-height:1.55">
+<strong style="color:#5c3d00">Important disclaimer:</strong>
+This tool provides general health information only. It is NOT a substitute
+for professional medical advice. If you are experiencing a medical emergency,
+please call <strong>911</strong> immediately.
+</div>
+""", unsafe_allow_html=True)
 
 
 # =============================================================================
@@ -344,6 +343,69 @@ for idx, msg in enumerate(st.session_state.chat_messages):
 # CHAT INPUT  (locked once assessment is complete)
 # =============================================================================
 
+# Handle chip selection from pills
+if st.session_state.get("_chip_selected"):
+    chip_input = st.session_state._chip_selected
+    st.session_state._chip_selected = None
+    st.session_state.chat_messages.append(
+        {"role": "user", "content": chip_input, "result": None}
+    )
+    with st.chat_message("user"):
+        st.markdown(chip_input)
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            result = process_multiturn_message(chip_input, dialog_state)
+        if result["status"] == "follow_up":
+            follow_up_text = result["response"]
+            st.markdown(follow_up_text)
+            st.session_state.chat_messages.append(
+                {"role": "assistant", "content": follow_up_text, "result": None}
+            )
+        elif result["status"] in ("emergency", "ml_prediction", "openai_fallback"):
+            rendered_content = render_assessment_result(result)
+            st.session_state.chat_messages.append(
+                {"role": "assistant", "content": rendered_content, "result": result}
+            )
+            if result["status"] == "emergency":
+                save_assessment(
+                    user_id=st.session_state.user_id,
+                    symptoms=result["user_input"],
+                    extracted_symptoms=result.get(
+                        "extracted_symptoms", result.get("matched_symptoms", [])
+                    ),
+                    urgency_level="Emergency",
+                    recommendation=result["action"],
+                )
+    st.rerun()
+
+# Show chips outside chat loop so they persist after rerun
+if (
+    not dialog_state.get("assessment_complete", False)
+    and dialog_state.get("turn_count", 0) > 0
+    and st.session_state.chat_messages[-1]["role"] == "assistant"
+):
+    turn = dialog_state.get("turn_count", 1)
+    if turn == 1:
+        chips = ["😌 Mild", "😐 Moderate", "😣 Severe", "😱 Unbearable"]
+        hint = "How severe are your symptoms?"
+    elif turn == 2:
+        chips = ["Under 1 hour", "Few hours", "1–2 days", "3+ days"]
+        hint = "How long have you had these symptoms?"
+    else:
+        chips = ["Head", "Chest", "Abdomen", "Back", "Limbs", "Multiple areas"]
+        hint = "Where in your body?"
+
+    st.caption(hint)
+    selected = st.pills(
+        label=hint,
+        options=chips,
+        label_visibility="collapsed",
+        key=f"chips_turn_{turn}"
+    )
+    if selected:
+        st.session_state._chip_selected = selected
+        st.rerun()
+
 if dialog_state.get("assessment_complete", False):
     st.info(
         "✅ Your assessment is complete. "
@@ -406,6 +468,29 @@ else:
                         {"role": "assistant", "content": follow_up_text, "result": None}
                     )
 
+                    # Show context-aware chips based on turn
+                    turn = dialog_state.get("turn_count", 1)
+                    if turn == 1:
+                        chips = ["😌 Mild", "😐 Moderate", "😣 Severe", "😱 Unbearable"]
+                        hint = "How severe are your symptoms?"
+                    elif turn == 2:
+                        chips = ["Under 1 hour", "Few hours", "1–2 days", "3+ days"]
+                        hint = "How long have you had these symptoms?"
+                    else:
+                        chips = ["Head", "Chest", "Abdomen", "Back", "Limbs", "Multiple areas"]
+                        hint = "Where in your body?"
+
+                    st.caption(hint)
+                    selected = st.pills(
+                        label=hint,
+                        options=chips,
+                        label_visibility="collapsed",
+                        key=f"chips_turn_{turn}"
+                    )
+                    if selected:
+                        st.session_state._chip_selected = selected
+                        st.rerun()
+
             # ------------------------------------------------------------------
             # FINAL ASSESSMENT — emergency, ML prediction, or OpenAI fallback
             # ------------------------------------------------------------------
@@ -454,4 +539,4 @@ else:
 # =============================================================================
 
 st.divider()
-st.caption("BC Health Platform — AI-powered health guidance for British Columbians")
+st.caption("CedarCare — AI-powered health guidance for British Columbians")
