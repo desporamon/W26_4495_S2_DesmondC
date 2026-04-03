@@ -76,9 +76,17 @@ section[data-testid="stSidebar"] > div {
     transition: background 0.2s, color 0.2s !important;
 }
 
-/* Monochrome (grayscale) icons for inactive tabs */
-[data-testid="stSidebarNav"] a span {
-    filter: brightness(10) !important;
+/* Force white text on all sidebar nav children */
+[data-testid="stSidebarNav"] a p,
+[data-testid="stSidebarNav"] a span:not(.icon),
+[data-testid="stSidebarNav"] li a {
+    color: rgba(255,255,255,0.7) !important;
+}
+
+/* Active item — full white */
+[data-testid="stSidebarNav"] a[aria-current="page"] p,
+[data-testid="stSidebarNav"] a[aria-current="page"] span {
+    color: #ffffff !important;
 }
 
 /* Inactive tab hover */
@@ -94,10 +102,6 @@ section[data-testid="stSidebar"] > div {
     font-weight: 700 !important;
 }
 
-/* Active tab icons - white */
-[data-testid="stSidebarNav"] a[aria-current="page"] span {
-    filter: grayscale(100%) brightness(10) !important;
-}
 </style>
 """
 
