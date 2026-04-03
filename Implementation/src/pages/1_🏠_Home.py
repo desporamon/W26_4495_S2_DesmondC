@@ -249,6 +249,28 @@ if most_common_name and stats["total_count"] > 0:
 # 1. WELCOME HEADER
 # =============================================================================
 
+st.markdown("""
+<div style="background:#fff;border-bottom:1px solid #e0edf4;
+padding:16px 24px;display:flex;align-items:center;gap:16px;
+margin:-1rem -1rem 1rem -1rem;">
+    <div style="width:52px;height:52px;background:#D4EFFC;
+    border-radius:12px;display:flex;align-items:center;
+    justify-content:center;flex-shrink:0;">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M5 13L14 5L23 13V23H17V17H11V23H5V13Z"
+            fill="#0078AE" stroke="#005a68" stroke-width="1.2"
+            stroke-linejoin="round"/>
+        </svg>
+    </div>
+    <div>
+        <div style="font-size:1.8rem;font-weight:700;color:#0a2e3d;
+        letter-spacing:-0.3px;">Home</div>
+        <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
+            Your personal health overview at a glance</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown(f"## \U0001f44b Welcome back, {username}!")
 st.caption("Here's your health overview")
 
