@@ -203,6 +203,31 @@ def facility_card(row: pd.Series) -> str:
 # PAGE HEADER
 # =============================================================================
 
+st.markdown("""
+<div style="background:#fff;border-bottom:1px solid #e0edf4;
+padding:16px 24px;display:flex;align-items:center;gap:16px;
+margin:-1rem -1rem 1rem -1rem;">
+    <div style="width:52px;height:52px;background:#faeeda;
+    border-radius:12px;display:flex;align-items:center;
+    justify-content:center;flex-shrink:0;">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 4C10.13 4 7 7.13 7 11C7 16.25 14 24 14 24
+            C14 24 21 16.25 21 11C21 7.13 17.87 4 14 4Z"
+            fill="#EF9F27" stroke="#854F0B" stroke-width="1.2"/>
+            <circle cx="14" cy="11" r="3" fill="#fff"
+            stroke="#854F0B" stroke-width="1.2"/>
+        </svg>
+    </div>
+    <div>
+        <div style="font-size:1.8rem;font-weight:700;color:#1a1a1a;
+        letter-spacing:-0.3px;">BC Healthcare Facility Finder</div>
+        <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
+            Find hospitals, clinics and urgent care centres near you
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 st.title("🏥 BC Healthcare Facility Finder")
 st.markdown("Find hospitals, clinics, and urgent care centres near you")
 

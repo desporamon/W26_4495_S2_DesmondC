@@ -159,6 +159,40 @@ div[data-testid="stExpander"]:has(.all-articles-marker) > details > summary span
 # PAGE HEADER
 # =============================================================================
 
+st.markdown("""
+<div style="background:#fff;border-bottom:1px solid #e0edf4;
+padding:16px 24px;display:flex;align-items:center;gap:16px;
+margin:-1rem -1rem 1rem -1rem;">
+    <div style="width:52px;height:52px;background:#eeedfe;
+    border-radius:12px;display:flex;align-items:center;
+    justify-content:center;flex-shrink:0;">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="5" y="5" width="8" height="18" rx="2"
+            fill="#7F77DD"/>
+            <rect x="15" y="5" width="8" height="18" rx="2"
+            fill="#AFA9EC"/>
+            <line x1="7" y1="9" x2="11" y2="9" stroke="white"
+            stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="7" y1="12" x2="11" y2="12" stroke="white"
+            stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="7" y1="15" x2="11" y2="15" stroke="white"
+            stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="17" y1="9" x2="21" y2="9" stroke="white"
+            stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="17" y1="12" x2="21" y2="12" stroke="white"
+            stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+    </div>
+    <div>
+        <div style="font-size:1.8rem;font-weight:700;color:#1a1a1a;
+        letter-spacing:-0.3px;">Health Education Library</div>
+        <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
+            Evidence-based health information from HealthLink BC
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown(
     '<div style="font-size:1.8rem;font-weight:700;margin-bottom:2px;">📚 Health Education Library</div>'
     '<div style="color:#888;font-size:0.95rem;margin-bottom:20px;">'

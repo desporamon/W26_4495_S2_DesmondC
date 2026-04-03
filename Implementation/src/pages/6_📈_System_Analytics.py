@@ -119,6 +119,33 @@ except FileNotFoundError:
 # PAGE HEADER + DATE RANGE SELECTOR
 # =============================================================================
 
+st.markdown("""
+<div style="background:#fff;border-bottom:1px solid #e0edf4;
+padding:16px 24px;display:flex;align-items:center;gap:16px;
+margin:-1rem -1rem 1rem -1rem;">
+    <div style="width:52px;height:52px;background:#e6f1fb;
+    border-radius:12px;display:flex;align-items:center;
+    justify-content:center;flex-shrink:0;">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="9" stroke="#0078AE"
+            stroke-width="1.5" fill="none"/>
+            <path d="M14 14L14 6" stroke="#0078AE"
+            stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M14 14L20 17" stroke="#185FA5"
+            stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="14" cy="14" r="2" fill="#0078AE"/>
+        </svg>
+    </div>
+    <div>
+        <div style="font-size:1.8rem;font-weight:700;color:#1a1a1a;
+        letter-spacing:-0.3px;">System Analytics Dashboard</div>
+        <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
+            Platform-wide health assessment insights and trends
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 header_left, header_right = st.columns([3, 2])
 
 with header_left:
