@@ -27,7 +27,7 @@ require_authentication()
 # =============================================================================
 
 st.set_page_config(
-    page_title="Home - BC Health Platform",
+    page_title="CedarCare — Home",
     page_icon="🏠",
     layout="wide"
 )

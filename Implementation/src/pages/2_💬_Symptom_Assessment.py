@@ -31,7 +31,7 @@ require_authentication()
 # =============================================================================
 
 st.set_page_config(
-    page_title="Symptom Assessment - BC Health Platform",
+    page_title="CedarCare — Symptom Assessment",
     page_icon="💬",
     layout="wide",
 )

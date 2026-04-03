@@ -410,8 +410,8 @@ def show_authenticated_view():
     st.markdown(
         f'<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">'
         f'<img src="data:image/png;base64,{logo_b64}" '
-        f'style="height:65px;" alt="BC Health Platform">'
-        f'<span style="font-size:2em;font-weight:700;">BC Health Platform</span>'
+        f'style="height:65px;" alt="CedarCare">'
+        f'<span style="font-size:2em;font-weight:700;">CedarCare</span>'
         f'</div>',
         unsafe_allow_html=True
     )
@@ -474,7 +474,7 @@ def show_auth_view():
         st.markdown(
             f'<div style="text-align:center;">'
             f'<img src="data:image/png;base64,{logo_b64}" '
-            f'style="height:90px;" alt="BC Health Platform">'
+            f'style="height:90px;" alt="CedarCare">'
             f'</div>',
             unsafe_allow_html=True
         )
@@ -526,7 +526,7 @@ def show_auth_view():
         st.divider()
         st.markdown(
             "<p style='text-align: center; font-size: 12px; color: gray;'>"
-            "© 2026 BC Health Platform | Secure & Confidential"
+            "© 2026 CedarCare | Secure & Confidential"
             "</p>",
             unsafe_allow_html=True
         )

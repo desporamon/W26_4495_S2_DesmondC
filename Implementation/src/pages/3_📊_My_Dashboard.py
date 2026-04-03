@@ -32,7 +32,7 @@ require_authentication()
 # =============================================================================
 
 st.set_page_config(
-    page_title="My Dashboard - BC Health Platform",
+    page_title="CedarCare — My Dashboard",
     page_icon="\U0001f4ca",
     layout="wide"
 )
@@ -637,7 +637,7 @@ with table_col:
 
 st.markdown(
     '<div class="dash-footer">'
-    f'\u00a9 {now.year} BC Health Platform. All rights reserved.'
+    f'\u00a9 {now.year} CedarCare. All rights reserved.'
     '<br>'
     '<a href="#">Privacy Policy</a> | '
     '<a href="#">Terms of Service</a> | '

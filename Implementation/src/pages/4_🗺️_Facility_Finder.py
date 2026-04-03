@@ -29,7 +29,7 @@ require_authentication()
 # =============================================================================
 
 st.set_page_config(
-    page_title="Facility Finder - BC Health Platform",
+    page_title="CedarCare — Facility Finder",
     page_icon="🏥",
     layout="wide",
 )
@@ -454,4 +454,4 @@ for i, (color, icon, name, desc, tags, tag_bg, tag_color) in enumerate(FACILITY_
 # =============================================================================
 
 st.divider()
-st.caption("BC Health Platform — Connecting you with healthcare across British Columbia")
+st.caption("CedarCare — AI-powered health guidance for British Columbians")

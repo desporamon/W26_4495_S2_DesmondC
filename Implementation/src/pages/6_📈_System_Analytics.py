@@ -31,7 +31,7 @@ require_authentication()
 # PAGE CONFIGURATION
 # =============================================================================
 st.set_page_config(
-    page_title="System Analytics - BC Health Platform",
+    page_title="CedarCare — System Analytics",
     page_icon="📈",
     layout="wide",
 )

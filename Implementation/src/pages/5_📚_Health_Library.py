@@ -20,7 +20,7 @@ require_authentication()
 # PAGE CONFIGURATION
 # =============================================================================
 st.set_page_config(
-    page_title="Health Library - BC Health Platform",
+    page_title="CedarCare — Health Library",
     page_icon="📚",
     layout="wide",
 )
