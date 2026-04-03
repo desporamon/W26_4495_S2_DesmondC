@@ -13,7 +13,7 @@ Sections:
 import streamlit as st
 import csv
 import io
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from collections import Counter, OrderedDict
 import numpy as np
 import plotly.graph_objects as go
@@ -293,15 +293,18 @@ if urgency_filter != "All Urgency Levels":
 # COMPUTE STATS
 # =============================================================================
 
-total_checks = len(filtered)
-
-# This month
-this_month_count = sum(
-    1 for a in filtered
-    if (parse_dt(a["created_at"]) or datetime.min).month == now.month
-    and (parse_dt(a["created_at"]) or datetime.min).year == now.year
-)
-current_month_label = now.strftime("%B %Y")
+# Last urgency level (from most recent assessment overall, not filtered)
+if all_assessments:
+    last_urgency = all_assessments[0].get("urgency_level", "No data yet") or "No data yet"
+    last_check_dt = parse_dt(all_assessments[0]["created_at"])
+    if last_check_dt:
+        days_since = (date.today() - last_check_dt.date()).days
+        days_since_label = f"{days_since} days"
+    else:
+        days_since_label = "\u2014"
+else:
+    last_urgency = "No data yet"
+    days_since_label = "\u2014"
 
 # Most common primary symptom
 symptom_counter = Counter()
@@ -310,7 +313,8 @@ for a in filtered:
 
 if symptom_counter:
     most_common_symptom, most_common_count = symptom_counter.most_common(1)[0]
-    most_common_pct = round(most_common_count / total_checks * 100) if total_checks else 0
+    total_filtered = len(filtered)
+    most_common_pct = round(most_common_count / total_filtered * 100) if total_filtered else 0
 else:
     most_common_symptom = "--"
     most_common_count = 0
@@ -381,17 +385,17 @@ c1, c2, c3, c4 = st.columns(4, gap="medium")
 with c1:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">\u2714 Total Checks</div>
-        <div class="stat-value">{total_checks}</div>
-        <div class="stat-subtitle">Since registration</div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">\u26a0 Last Urgency Level</div>
+        <div class="stat-value">{last_urgency}</div>
+        <div class="stat-subtitle">Most recent assessment</div>
         """, unsafe_allow_html=True)
 
 with c2:
     with st.container(border=True):
         st.markdown(f"""
-        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">\U0001f4c5 This Month</div>
-        <div class="stat-value">{this_month_count}</div>
-        <div class="stat-subtitle">{current_month_label}</div>
+        <div style="background-color:#1a6b5c;color:white;padding:8px 16px;border-radius:4px 4px 0 0;font-size:14px;font-weight:600;margin:-1px -1px 14px -1px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">\U0001f4c5 Days Since Last Check</div>
+        <div class="stat-value">{days_since_label}</div>
+        <div class="stat-subtitle">Time since last assessment</div>
         """, unsafe_allow_html=True)
 
 with c3:
