@@ -1,5 +1,5 @@
 # =============================================================================
-# BC Health Platform - Shared Header Banner
+# CedarCare - Shared Header Banner
 # =============================================================================
 
 """
@@ -44,13 +44,20 @@ header[data-testid="stHeader"] {
     display: none !important;
 }
 
+/* Topbar — white with bottom border */
+[data-testid="stHeader"] {
+    background-color: #FFFFFF !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: none !important;
+}
+
 /* ---- Sidebar styling ---- */
 /* Light cyan sidebar background */
 section[data-testid="stSidebar"] {
-    background-color: #D4EFFC !important;
+    background-color: #005a68 !important;
 }
 section[data-testid="stSidebar"] > div {
-    background-color: #D4EFFC !important;
+    background-color: #005a68 !important;
 }
 
 /* Hide the "app" label at the top of sidebar nav */
@@ -60,8 +67,8 @@ section[data-testid="stSidebar"] > div {
 
 /* Sidebar nav links - darker, bolder text */
 [data-testid="stSidebarNav"] a {
-    color: #1a1a1a !important;
-    font-weight: 600 !important;
+    color: rgba(255,255,255,0.7) !important;
+    font-weight: 500 !important;
     font-size: 0.95em !important;
     padding: 0.5rem 1rem !important;
     border-radius: 8px !important;
@@ -71,13 +78,13 @@ section[data-testid="stSidebar"] > div {
 
 /* Monochrome (grayscale) icons for inactive tabs */
 [data-testid="stSidebarNav"] a span {
-    filter: grayscale(100%) !important;
+    filter: brightness(10) !important;
 }
 
 /* Inactive tab hover */
 [data-testid="stSidebarNav"] a:hover {
-    background-color: rgba(0, 98, 113, 0.1) !important;
-    color: #006271 !important;
+    background-color: rgba(255,255,255,0.1) !important;
+    color: #ffffff !important;
 }
 
 /* Active tab - teal background with white text */
@@ -104,14 +111,14 @@ _BANNER_CSS = """
     left: 0;
     width: 100%;
     height: 60px;
-    background-color: #006271;
+    background-color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
     box-sizing: border-box;
     z-index: 999;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.10);
 }
 
 /* ---- Push main content below the banner ---- */
@@ -142,9 +149,9 @@ section[data-testid="stSidebar"] > div {
 
 /* ---- Logout link styled as button ---- */
 .bc-header .logout-link {
-    color: #fff;
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.4);
+    color: #005a68;
+    background: rgba(0,90,104,0.08);
+    border: 1px solid rgba(0,90,104,0.3);
     padding: 5px 16px;
     border-radius: 6px;
     text-decoration: none;
@@ -242,12 +249,12 @@ def render_header():
             <div style="display:flex;align-items:center;gap:12px;">
                 <img src="data:image/png;base64,{logo_b64}"
                      style="height:38px;" alt="Logo">
-                <span style="color:#fff;font-size:1.25em;font-weight:700;">
-                    BC Health Platform
+                <span style="font-size:1.1em;letter-spacing:-.3px;">
+                    <strong style="color:#005a68;font-weight:700;">Cedar</strong><span style="color:#0078AE;font-weight:400;">Care</span>
                 </span>
             </div>
             <div style="display:flex;align-items:center;">
-                <span style="color:rgba(255,255,255,0.9);font-size:0.9em;">
+                <span style="color:#374151;font-size:0.9em;">
                     User: {user_name}
                 </span>
                 <a href="?logout=1" target="_self" class="logout-link">
