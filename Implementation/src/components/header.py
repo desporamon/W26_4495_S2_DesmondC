@@ -102,6 +102,19 @@ section[data-testid="stSidebar"] > div {
     font-weight: 700 !important;
 }
 
+/* Remove Streamlit default bottom whitespace */
+footer { display: none !important; }
+.stApp { min-height: unset !important; }
+[data-testid="stAppViewContainer"] {
+    min-height: unset !important;
+    height: unset !important;
+}
+[data-testid="stVerticalBlock"] {
+    min-height: unset !important;
+}
+
+
+
 </style>
 """
 
@@ -128,6 +141,7 @@ _BANNER_CSS = """
 /* ---- Push main content below the banner ---- */
 .main .block-container {
     padding-top: 80px !important;
+    padding-bottom: 2rem !important;
 }
 
 /* ---- Force sidebar visible and push below the banner ---- */
@@ -165,8 +179,8 @@ section[data-testid="stSidebar"] > div {
     transition: background 0.2s;
 }
 .bc-header .logout-link:hover {
-    background: rgba(255,255,255,0.3);
-    color: #fff;
+    background: rgba(0,90,104,0.15);
+    color: #005a68;
 }
 </style>
 """

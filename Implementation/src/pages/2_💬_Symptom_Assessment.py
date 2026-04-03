@@ -130,38 +130,56 @@ dialog_state: dict = st.session_state.dialog_state
 # =============================================================================
 
 with st.sidebar:
-    st.markdown("### 💬 Assessment Controls")
+    st.markdown("""
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);
+    letter-spacing:.08em;text-transform:uppercase;
+    margin-bottom:10px;">Assessment</div>
+    """, unsafe_allow_html=True)
 
     if st.button("🔄 Start New Assessment", use_container_width=True):
         _reset_conversation()
         st.rerun()
-
-    st.divider()
 
     # Live progress panel — shows what's been collected across turns
     turn_count = dialog_state.get("turn_count", 0)
     symptoms_so_far = dialog_state.get("symptoms", [])
 
     if turn_count > 0:
-        st.markdown("**📋 Collected so far:**")
-        if symptoms_so_far:
-            st.markdown(f"- **Symptoms:** {', '.join(symptoms_so_far)}")
-        if dialog_state.get("duration"):
-            st.markdown(f"- **Duration:** {dialog_state['duration']}")
-        if dialog_state.get("severity"):
-            st.markdown(f"- **Severity:** {dialog_state['severity']}")
-        if dialog_state.get("body_location"):
-            st.markdown(f"- **Location:** {dialog_state['body_location']}")
+        st.markdown("""
+        <div style="background:rgba(0,0,0,0.2);border-radius:8px;
+        padding:12px;margin-top:14px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);
+        letter-spacing:.08em;text-transform:uppercase;
+        margin-bottom:10px;">Collected so far</div>
+        """, unsafe_allow_html=True)
 
+        rows = []
+        if symptoms_so_far:
+            rows.append(("Symptoms", ", ".join(symptoms_so_far)))
+        if dialog_state.get("severity"):
+            rows.append(("Severity", dialog_state["severity"]))
+        if dialog_state.get("duration"):
+            rows.append(("Duration", dialog_state["duration"]))
+        if dialog_state.get("body_location"):
+            rows.append(("Location", dialog_state["body_location"]))
+
+        html_rows = "".join(
+            f'<div style="margin-bottom:6px;">'
+            f'<span style="font-size:11px;color:rgba(255,255,255,0.4);">{lbl}:</span>'
+            f'<br><span style="font-size:13px;color:rgba(255,255,255,0.9);">{val}</span>'
+            f'</div>'
+            for lbl, val in rows
+        )
+
+        complete = ""
         if dialog_state.get("assessment_complete"):
-            st.success("✅ Assessment complete")
-        else:
-            max_turns = 3
-            remaining = max(0, max_turns - turn_count)
+            complete = '<div style="color:#5DCAA5;font-size:13px;margin-top:8px;">✅ Assessment complete</div>'
+        elif turn_count > 0:
+            remaining = max(0, 3 - turn_count)
             if remaining > 0:
-                st.caption(
-                    f"Up to {remaining} more question(s) before final assessment."
-                )
+                complete = f'<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:8px;">{remaining} question(s) remaining</div>'
+
+        st.markdown(html_rows + complete + "</div>", unsafe_allow_html=True)
 
 
 # =============================================================================
@@ -315,10 +333,7 @@ for idx, msg in enumerate(st.session_state.chat_messages):
         if msg["role"] == "user":
             st.markdown(msg["content"])
         else:
-            # Pre-rendered markdown (safe for follow-up text and full result cards)
             st.markdown(msg["content"], unsafe_allow_html=True)
-
-            # Save button for final (non-emergency) assessments
             result = msg.get("result")
             if result and result.get("status") in ("ml_prediction", "openai_fallback"):
                 if idx in st.session_state.saved_assessments:
