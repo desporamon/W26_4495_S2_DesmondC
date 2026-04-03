@@ -40,7 +40,7 @@ st.set_page_config(
 # IMPORTS (after page config)
 # =============================================================================
 
-from components.header import render_header
+from components.header import render_header, get_logo_base64
 from components.chatbot import initialize_dialog_state, process_multiturn_message
 from components.database import save_assessment
 
@@ -185,6 +185,26 @@ with st.sidebar:
 # =============================================================================
 # PAGE HEADER
 # =============================================================================
+
+_logo_b64 = get_logo_base64()
+st.markdown(f"""
+<div style="background:#fff;border-bottom:1px solid #e0edf4;
+padding:16px 24px;display:flex;align-items:center;gap:16px;
+margin:-1rem -1rem 1rem -1rem;">
+    <div style="width:52px;height:52px;background:#D4EFFC;
+    border-radius:12px;display:flex;align-items:center;
+    justify-content:center;flex-shrink:0;">
+        <img src="data:image/png;base64,{_logo_b64}"
+             style="height:38px;" alt="CedarCare logo">
+    </div>
+    <div>
+        <div style="font-size:1.5rem;font-weight:700;color:#0a2e3d;
+        letter-spacing:-0.3px;">Symptom Assessment Chatbot</div>
+        <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
+            Describe your symptoms to begin your AI-powered triage</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("""
 <div style="background:#fffbeb;border-left:4px solid #f59e0b;
