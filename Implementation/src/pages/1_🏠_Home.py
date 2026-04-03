@@ -377,3 +377,21 @@ with tip_left:
 with tip_right:
     if st.button("Find Nearest Pharmacy \u2192", type="primary", use_container_width=True):
         st.switch_page("pages/4_\U0001f5fa\ufe0f_Facility_Finder.py")
+
+
+# =============================================================================
+# 5. FOOTER
+# =============================================================================
+
+st.divider()
+st.markdown(
+    '<div style="text-align:center;color:#999;font-size:12px;padding:20px 0;margin-top:32px;">'
+    f'\u00a9 {datetime.now().year} CedarCare. All rights reserved.'
+    '<br>'
+    '<a href="#" style="color:#888;text-decoration:none;margin:0 8px;">Privacy Policy</a> | '
+    '<a href="#" style="color:#888;text-decoration:none;margin:0 8px;">Terms of Service</a> | '
+    '<a href="#" style="color:#888;text-decoration:none;margin:0 8px;">Contact Us</a> | '
+    '<a href="#" style="color:#888;text-decoration:none;margin:0 8px;">Help</a>'
+    '</div>',
+    unsafe_allow_html=True,
+)

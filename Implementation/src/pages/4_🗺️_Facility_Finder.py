@@ -8,6 +8,7 @@ and urgent care centres using real facility data from the facilities CSV.
 """
 
 import os
+from datetime import datetime
 from urllib.parse import quote
 
 import pandas as pd
@@ -455,3 +456,15 @@ for i, (color, icon, name, desc, tags, tag_bg, tag_color) in enumerate(FACILITY_
 
 st.divider()
 st.caption("CedarCare — AI-powered health guidance for British Columbians")
+
+st.markdown(
+    '<div style="text-align:center;color:#999;font-size:12px;padding:20px 0;margin-top:32px;">'
+    f'\u00a9 {datetime.now().year} CedarCare. All rights reserved.'
+    '<br>'
+    '<a href="#" style="color:#888;text-decoration:none;margin:0 8px;">Privacy Policy</a> | '
+    '<a href="#" style="color:#888;text-decoration:none;margin:0 8px;">Terms of Service</a> | '
+    '<a href="#" style="color:#888;text-decoration:none;margin:0 8px;">Contact Us</a> | '
+    '<a href="#" style="color:#888;text-decoration:none;margin:0 8px;">Help</a>'
+    '</div>',
+    unsafe_allow_html=True,
+)
