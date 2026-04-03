@@ -198,7 +198,7 @@ margin:-1rem -1rem 1rem -1rem;">
              style="height:38px;" alt="CedarCare logo">
     </div>
     <div>
-        <div style="font-size:1.5rem;font-weight:700;color:#0a2e3d;
+        <div style="font-size:1.8rem;font-weight:700;color:#0a2e3d;
         letter-spacing:-0.3px;">Symptom Assessment Chatbot</div>
         <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
             Describe your symptoms to begin your AI-powered triage</div>

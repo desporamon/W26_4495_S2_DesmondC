@@ -114,7 +114,6 @@ footer { display: none !important; }
 }
 
 
-
 </style>
 """
 
