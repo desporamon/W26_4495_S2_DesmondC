@@ -271,8 +271,14 @@ margin:-1rem -1rem 1rem -1rem;">
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown(f"## \U0001f44b Welcome back, {username}!")
-st.caption("Here's your health overview")
+st.markdown(f"""
+<div style="margin-bottom:20px;">
+    <div style="font-size:1.4rem;font-weight:700;color:#0a2e3d;">
+        Welcome back, {username}!</div>
+    <div style="font-size:14px;color:#7a9aaa;margin-top:3px;">
+        Here's your health overview for today</div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # =============================================================================
@@ -283,23 +289,56 @@ qa1, qa2, qa3 = st.columns(3, gap="medium")
 
 with qa1:
     with st.container(border=True):
-        st.markdown('<div class="icon-box icon-blue">\U0001f4ac</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="width:44px;height:44px;background:#D4EFFC;border-radius:10px;
+        display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+                <path d="M14 3C14 3 10 7 10 13C10 17.5 12 20.5 14 22C16 20.5
+                18 17.5 18 13C18 7 14 3 14 3Z" fill="#5DCAA5" stroke="#005a68"
+                stroke-width="1.2"/>
+                <line x1="14" y1="8" x2="14" y2="22" stroke="#005a68"
+                stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+        </div>""", unsafe_allow_html=True)
         st.markdown("**Check Symptoms**")
-        st.caption("Assess your symptoms now")
+        st.caption("AI-powered health triage")
         st.page_link("pages/2_\U0001f4ac_Symptom_Assessment.py", label="Get Started \u2192")
 
 with qa2:
     with st.container(border=True):
-        st.markdown('<div class="icon-box icon-green">\U0001f4cd</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="width:44px;height:44px;background:#faeeda;border-radius:10px;
+        display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+                <path d="M14 4C10.13 4 7 7.13 7 11C7 16.25 14 24 14 24C14 24
+                21 16.25 21 11C21 7.13 17.87 4 14 4Z" fill="#EF9F27"
+                stroke="#854F0B" stroke-width="1.2"/>
+                <circle cx="14" cy="11" r="3" fill="#fff" stroke="#854F0B"
+                stroke-width="1.2"/>
+            </svg>
+        </div>""", unsafe_allow_html=True)
         st.markdown("**Find Facility**")
-        st.caption("Locate nearby clinics")
+        st.caption("Hospitals and clinics near you")
         st.page_link("pages/4_\U0001f5fa\ufe0f_Facility_Finder.py", label="Search Now \u2192")
 
 with qa3:
     with st.container(border=True):
-        st.markdown('<div class="icon-box icon-teal">\U0001f4da</div>', unsafe_allow_html=True)
-        st.markdown("**Health Info**")
-        st.caption("Browse health topics")
+        st.markdown("""
+        <div style="width:44px;height:44px;background:#eeedfe;border-radius:10px;
+        display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+                <rect x="5" y="5" width="8" height="18" rx="2" fill="#7F77DD"/>
+                <rect x="15" y="5" width="8" height="18" rx="2" fill="#AFA9EC"/>
+                <line x1="7" y1="9" x2="11" y2="9" stroke="white"
+                stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="7" y1="12" x2="11" y2="12" stroke="white"
+                stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="17" y1="9" x2="21" y2="9" stroke="white"
+                stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>""", unsafe_allow_html=True)
+        st.markdown("**Health Library**")
+        st.caption("Evidence-based health info")
         st.page_link("pages/5_\U0001f4da_Health_Library.py", label="Explore \u2192")
 
 
