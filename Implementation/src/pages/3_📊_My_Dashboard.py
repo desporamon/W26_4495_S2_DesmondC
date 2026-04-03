@@ -343,37 +343,51 @@ else:
 # 1. PAGE HEADER
 # =============================================================================
 
-head_left, btn_export, btn_new = st.columns([5, 1.5, 1.5], vertical_alignment="bottom")
+col_header, col_export, col_new = st.columns([6, 1.2, 1.2],
+    vertical_alignment="center")
 
-with head_left:
-    logo_col, title_col = st.columns([0.5, 5])
-    with logo_col:
-        st.image("assets/logo.png", width=55)
-    with title_col:
-        st.markdown(
-            '<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">'
-            '<span style="font-size: 1.5rem; font-weight: 700;">My Personal Health Dashboard</span><br>'
-            f'<span style="font-size: 14px; color: #888;">Welcome back, {username}! Here\'s an overview of your health journey.</span>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
+with col_header:
+    st.markdown(f"""
+    <div style="background:#fff;border-bottom:1px solid #e0edf4;
+    padding:16px 0;display:flex;align-items:center;gap:16px;">
+        <div style="width:52px;height:52px;background:#e1f5ee;
+        border-radius:12px;display:flex;align-items:center;
+        justify-content:center;flex-shrink:0;">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <rect x="4" y="14" width="5" height="10" rx="1.5"
+                fill="#1D9E75"/>
+                <rect x="11.5" y="10" width="5" height="14" rx="1.5"
+                fill="#1D9E75"/>
+                <rect x="19" y="6" width="5" height="18" rx="1.5"
+                fill="#1D9E75"/>
+                <path d="M6.5 12L12 8L19.5 5" stroke="#005a68"
+                stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:1.8rem;font-weight:700;
+            color:#1a1a1a;letter-spacing:-0.3px;">
+            My Personal Health Dashboard</div>
+            <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
+            Welcome back, {username}! Here's an overview of your
+            health journey.</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-with btn_export:
-    st.markdown('<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">', unsafe_allow_html=True)
+with col_export:
     st.download_button(
-        label="\u2913 Export Report",
+        label="\u2193 Export Report",
         data=generate_report_csv(all_assessments),
         file_name="health_report.csv",
         mime="text/csv",
         use_container_width=True,
     )
-    st.markdown('</div>', unsafe_allow_html=True)
 
-with btn_new:
-    st.markdown('<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px;">', unsafe_allow_html=True)
-    if st.button("+ New Assessment", type="primary", use_container_width=True):
+with col_new:
+    if st.button("+ New Assessment", type="primary",
+        use_container_width=True):
         st.switch_page("pages/2_\U0001f4ac_Symptom_Assessment.py")
-    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # =============================================================================
