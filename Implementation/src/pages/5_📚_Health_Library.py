@@ -193,13 +193,6 @@ margin:-1rem -1rem 1rem -1rem;">
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown(
-    '<div style="font-size:1.8rem;font-weight:700;margin-bottom:2px;">📚 Health Education Library</div>'
-    '<div style="color:#888;font-size:0.95rem;margin-bottom:20px;">'
-    'Evidence-based health information from HealthLinkBC</div>',
-    unsafe_allow_html=True,
-)
-
 
 # =============================================================================
 # SECTION 1 — FIND HEALTH INFORMATION (search bar)

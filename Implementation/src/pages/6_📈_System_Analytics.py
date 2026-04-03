@@ -119,58 +119,50 @@ except FileNotFoundError:
 # PAGE HEADER + DATE RANGE SELECTOR
 # =============================================================================
 
-st.markdown("""
-<div style="background:#fff;border-bottom:1px solid #e0edf4;
-padding:16px 24px;display:flex;align-items:center;gap:16px;
-margin:-1rem -1rem 1rem -1rem;">
-    <div style="width:52px;height:52px;background:#e6f1fb;
-    border-radius:12px;display:flex;align-items:center;
-    justify-content:center;flex-shrink:0;">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <circle cx="14" cy="14" r="9" stroke="#0078AE"
-            stroke-width="1.5" fill="none"/>
-            <path d="M14 14L14 6" stroke="#0078AE"
-            stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M14 14L20 17" stroke="#185FA5"
-            stroke-width="1.5" stroke-linecap="round"/>
-            <circle cx="14" cy="14" r="2" fill="#0078AE"/>
-        </svg>
-    </div>
-    <div>
-        <div style="font-size:1.8rem;font-weight:700;color:#1a1a1a;
-        letter-spacing:-0.3px;">System Analytics Dashboard</div>
-        <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
-            Platform-wide health assessment insights and trends
+col_header, col_export, col_range = st.columns([5, 1, 1.3],
+    vertical_alignment="center")
+
+with col_header:
+    st.markdown("""
+    <div style="background:#fff;border-bottom:1px solid #e0edf4;
+    padding:16px 0;display:flex;align-items:center;gap:16px;">
+        <div style="width:52px;height:52px;background:#e6f1fb;
+        border-radius:12px;display:flex;align-items:center;
+        justify-content:center;flex-shrink:0;">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <circle cx="14" cy="14" r="9" stroke="#0078AE"
+                stroke-width="1.5" fill="none"/>
+                <path d="M14 14L14 6" stroke="#0078AE"
+                stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M14 14L20 17" stroke="#185FA5"
+                stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="14" cy="14" r="2" fill="#0078AE"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:1.8rem;font-weight:700;
+            color:#1a1a1a;letter-spacing:-0.3px;">
+            System Analytics Dashboard</div>
+            <div style="font-size:13px;color:#7a9aaa;margin-top:3px;">
+            Platform-wide health assessment insights and trends</div>
         </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-header_left, header_right = st.columns([3, 2])
+with col_export:
+    if st.button("Export Report", use_container_width=True):
+        st.toast("Export feature coming soon!")
 
-with header_left:
-    st.markdown(
-        '<div style="font-size:1.8rem;font-weight:700;margin-bottom:2px;">'
-        '📈 System Analytics Dashboard</div>'
-        '<div style="color:#888;font-size:0.95rem;margin-bottom:16px;">'
-        'Platform-wide health assessment insights and trends</div>',
-        unsafe_allow_html=True,
+with col_range:
+    date_options = ["Last 7 Days", "Last 30 Days", "Last 90 Days",
+        "All Time"]
+    st.session_state.sa_date_range = st.selectbox(
+        "Date range",
+        date_options,
+        index=date_options.index(st.session_state.sa_date_range),
+        label_visibility="collapsed",
+        key="sa_date_range_select",
     )
-
-with header_right:
-    r_spacer, r_export, r_range = st.columns([1, 1.2, 1.5])
-    with r_export:
-        if st.button("Export Report", use_container_width=True):
-            st.toast("Export feature coming soon!")
-    with r_range:
-        date_options = ["Last 7 Days", "Last 30 Days", "Last 90 Days", "All Time"]
-        st.session_state.sa_date_range = st.selectbox(
-            "Date range",
-            date_options,
-            index=date_options.index(st.session_state.sa_date_range),
-            label_visibility="collapsed",
-            key="sa_date_range_select",
-        )
 
 
 # =============================================================================

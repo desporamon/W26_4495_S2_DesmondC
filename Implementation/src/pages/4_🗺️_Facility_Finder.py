@@ -228,9 +228,6 @@ margin:-1rem -1rem 1rem -1rem;">
 </div>
 """, unsafe_allow_html=True)
 
-st.title("🏥 BC Healthcare Facility Finder")
-st.markdown("Find hospitals, clinics, and urgent care centres near you")
-
 
 # =============================================================================
 # 2B — EMERGENCY CONTACTS
