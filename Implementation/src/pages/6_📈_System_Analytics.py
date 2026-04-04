@@ -410,18 +410,19 @@ fig_trend.update_traces(
 )
 
 # Trendline via numpy polyfit (degree 1)
-coeffs = np.polyfit(x_num, y_vals, 1)
-trend_y = np.polyval(coeffs, x_num)
-
-fig_trend.add_trace(
-    go.Scatter(
-        x=monthly["month_label"],
-        y=trend_y,
-        mode="lines",
-        name="Trend",
-        line=dict(color="#ff7f0e", width=2, dash="dash"),
-    )
-)
+try:
+    if len(x_num) >= 2 and len(set(x_num)) >= 2:
+        coeffs = np.polyfit(x_num, y_vals, 1)
+        trendline = np.poly1d(coeffs)(x_num)
+        fig_trend.add_trace(go.Scatter(
+            x=monthly["month_label"],
+            y=trendline,
+            mode="lines",
+            name="Trend",
+            line=dict(color="orange", width=2, dash="dash"),
+        ))
+except (np.linalg.LinAlgError, ValueError):
+    pass
 
 # Annotate max and min data points
 idx_max = int(np.argmax(y_vals))
