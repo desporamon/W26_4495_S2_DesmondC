@@ -432,7 +432,6 @@ if (
         chips = ["Head", "Chest", "Abdomen", "Back", "Limbs", "Multiple areas"]
         hint = "Where in your body?"
 
-    st.caption(hint)
     selected = st.pills(
         label=hint,
         options=chips,
@@ -506,7 +505,6 @@ else:
                         chips = ["Head", "Chest", "Abdomen", "Back", "Limbs", "Multiple areas"]
                         hint = "Where in your body?"
 
-                    st.caption(hint)
                     selected = st.pills(
                         label=hint,
                         options=chips,
