@@ -479,6 +479,26 @@ def show_auth_view():
             unsafe_allow_html=True
         )
 
+        # Style the Login / Create Account submit buttons
+        st.markdown("""
+        <style>
+        button[data-testid="stBaseButton-secondaryFormSubmit"] {
+            background-color: #005a68 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 15px !important;
+            padding: 12px !important;
+            width: 100% !important;
+        }
+        button[data-testid="stBaseButton-secondaryFormSubmit"]:hover {
+            background-color: #004a57 !important;
+            color: #ffffff !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
         # Create tabs for Login and Register
         login_tab, register_tab = st.tabs(["LOGIN", "REGISTER"])
 
