@@ -29,4 +29,5 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           cd Implementation/src
-          pytest ../../tests/ -v --tb=short
+          python -m pytest ../../tests/ -v --tb=short
+
