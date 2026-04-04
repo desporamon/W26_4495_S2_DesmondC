@@ -239,35 +239,85 @@ ec1, ec2, ec3 = st.columns(3)
 
 with ec1:
     st.markdown("""
-<div style="background:white;border-top:4px solid #f44336;border-radius:8px;
-  padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;">
-  <div style="font-size:1.8em;margin-bottom:4px;">📞</div>
-  <div style="color:#555;font-size:0.9em;margin-bottom:4px;font-weight:600;">Emergency Services</div>
-  <div style="font-size:2.2em;font-weight:700;color:#f44336;">911</div>
-  <div style="color:#888;font-size:0.82em;margin-top:6px;">For life-threatening emergencies</div>
-</div>""", unsafe_allow_html=True)
+    <div style="background:#fff;border:0.5px solid #e0edf4;
+    border-radius:12px;border-left:4px solid #dc2626;
+    padding:20px;display:flex;align-items:center;gap:16px;">
+        <div style="width:46px;height:46px;border-radius:50%;
+        background:#fee2e2;display:flex;align-items:center;
+        justify-content:center;flex-shrink:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2
+                c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20
+                c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5
+                c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1
+                L6.6 10.8z" fill="#dc2626"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:13px;color:#555;font-weight:500;
+            margin-bottom:5px;">Emergency Services</div>
+            <div style="font-size:1.8rem;font-weight:700;color:#dc2626;
+            letter-spacing:-1px;line-height:1;margin-bottom:5px;">911</div>
+            <div style="font-size:13px;color:#555;">
+            Life-threatening emergencies</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with ec2:
     st.markdown("""
-<div style="background:white;border-top:4px solid #2196F3;border-radius:8px;
-  padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;">
-  <div style="font-size:1.8em;margin-bottom:4px;">👤</div>
-  <div style="color:#555;font-size:0.9em;margin-bottom:4px;font-weight:600;">HealthLink BC</div>
-  <div style="font-size:2.2em;font-weight:700;color:#2196F3;">811</div>
-  <div style="color:#888;font-size:0.82em;margin-top:6px;">24/7 health advice from nurses</div>
-</div>""", unsafe_allow_html=True)
+    <div style="background:#fff;border:0.5px solid #e0edf4;
+    border-radius:12px;border-left:4px solid #0078AE;
+    padding:20px;display:flex;align-items:center;gap:16px;">
+        <div style="width:46px;height:46px;border-radius:50%;
+        background:#D4EFFC;display:flex;align-items:center;
+        justify-content:center;flex-shrink:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2
+                c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20
+                c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5
+                c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1
+                L6.6 10.8z" fill="#0078AE"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:13px;color:#555;font-weight:500;
+            margin-bottom:5px;">HealthLink BC</div>
+            <div style="font-size:1.8rem;font-weight:700;color:#0078AE;
+            letter-spacing:-1px;line-height:1;margin-bottom:5px;">8-1-1</div>
+            <div style="font-size:13px;color:#555;">
+            24/7 health advice from nurses</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with ec3:
     st.markdown("""
-<div style="background:white;border-top:4px solid #9c27b0;border-radius:8px;
-  padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;">
-  <div style="font-size:1.8em;margin-bottom:4px;">📞</div>
-  <div style="color:#555;font-size:0.9em;margin-bottom:4px;font-weight:600;">Crisis Line</div>
-  <div style="font-size:1.5em;font-weight:700;color:#9c27b0;">1-800-784-2433</div>
-  <div style="color:#888;font-size:0.82em;margin-top:6px;">Mental health support</div>
-</div>""", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
+    <div style="background:#fff;border:0.5px solid #e0edf4;
+    border-radius:12px;border-left:4px solid #1D9E75;
+    padding:20px;display:flex;align-items:center;gap:16px;">
+        <div style="width:46px;height:46px;border-radius:50%;
+        background:#e1f5ee;display:flex;align-items:center;
+        justify-content:center;flex-shrink:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2
+                c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20
+                c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5
+                c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1
+                L6.6 10.8z" fill="#1D9E75"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:13px;color:#555;font-weight:500;
+            margin-bottom:5px;">Crisis Line</div>
+            <div style="font-size:1.3rem;font-weight:700;color:#1D9E75;
+            letter-spacing:-0.5px;line-height:1;margin-bottom:5px;">
+            1-800-784-2433</div>
+            <div style="font-size:13px;color:#555;">
+            Mental health support</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # =============================================================================
