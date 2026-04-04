@@ -32,6 +32,8 @@ from components.auth import (
 # Import shared header banner and CSS helpers
 from components.header import render_header, inject_global_css, hide_sidebar, get_logo_base64
 
+from seed_db import run_seed
+
 
 # =============================================================================
 # PAGE CONFIGURATION
@@ -680,7 +682,7 @@ def main():
     Controls the flow between authentication screens and the main app.
     """
     # Initialize the database (creates tables if they don't exist)
-    init_db()
+    run_seed()
 
     # Initialize session state variables
     init_session_state()
