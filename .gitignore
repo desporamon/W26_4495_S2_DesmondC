@@ -217,4 +217,3 @@ __marimo__/
 *.db
 
 # ML model files (large)
-*.pkl
