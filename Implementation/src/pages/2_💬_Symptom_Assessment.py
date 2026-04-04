@@ -392,6 +392,10 @@ if st.session_state.get("_chip_selected"):
         with st.spinner("Thinking..."):
             result = process_multiturn_message(chip_input, dialog_state)
         if result["status"] == "follow_up":
+            if result.get("collected_symptoms"):
+                st.session_state._show_chips = True
+            else:
+                st.session_state._show_chips = False
             follow_up_text = result["response"]
             st.markdown(follow_up_text)
             st.session_state.chat_messages.append(
@@ -402,6 +406,7 @@ if st.session_state.get("_chip_selected"):
             st.session_state.chat_messages.append(
                 {"role": "assistant", "content": rendered_content, "result": result}
             )
+            st.session_state._show_chips = False
             if result["status"] == "emergency":
                 save_assessment(
                     user_id=st.session_state.user_id,
@@ -474,17 +479,29 @@ else:
             if result["status"] == "follow_up":
                 # If no symptoms collected yet, decide based on which turn we're on.
                 if not result.get("collected_symptoms"):
-                    end_text = (
-                        "I'm only able to help with health symptom assessments. "
-                        "Please use **🔄 Start New Assessment** in the sidebar "
-                        "whenever you're ready to describe your symptoms. Take care! 💙"
-                    )
-                    st.markdown(end_text)
-                    dialog_state["assessment_complete"] = True
-                    st.session_state._show_chips = False
-                    st.session_state.chat_messages.append(
-                        {"role": "assistant", "content": end_text, "result": None}
-                    )
+                    if result.get("turn_count", 1) <= 1:
+                        gentle_text = (
+                            "I want to make sure I help you correctly. Could you describe "
+                            "your symptoms in a bit more detail? For example, where does it "
+                            "hurt, or what feels wrong?"
+                        )
+                        st.markdown(gentle_text)
+                        st.session_state._show_chips = False
+                        st.session_state.chat_messages.append(
+                            {"role": "assistant", "content": gentle_text, "result": None}
+                        )
+                    else:
+                        end_text = (
+                            "I'm only able to help with health symptom assessments. "
+                            "Please use **🔄 Start New Assessment** in the sidebar "
+                            "whenever you're ready to describe your symptoms. Take care! 💙"
+                        )
+                        st.markdown(end_text)
+                        dialog_state["assessment_complete"] = True
+                        st.session_state._show_chips = False
+                        st.session_state.chat_messages.append(
+                            {"role": "assistant", "content": end_text, "result": None}
+                        )
                 else:
                     st.session_state._show_chips = True
                     follow_up_text = result["response"]

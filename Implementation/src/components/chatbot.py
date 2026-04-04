@@ -607,6 +607,10 @@ def process_multiturn_message(user_input: str, dialog_state: dict) -> dict:
         if sym and sym.lower() not in [s.lower() for s in dialog_state["symptoms"]]:
             dialog_state["symptoms"].append(sym)
 
+    if dialog_state["symptoms"] and dialog_state.get("_symptoms_turn_reset") is None:
+        dialog_state["turn_count"] = 1
+        dialog_state["_symptoms_turn_reset"] = True
+
     extracted_duration = extraction.get("duration")
     if extracted_duration and extracted_duration != "unknown":
         dialog_state["duration"] = extracted_duration
