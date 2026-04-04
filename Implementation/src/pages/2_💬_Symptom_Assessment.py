@@ -112,6 +112,7 @@ def _reset_conversation():
         }
     ]
     st.session_state.saved_assessments = set()
+    st.session_state._show_chips = False
 
 
 # Initialise on first load (or if dialog_state was never set)
@@ -418,6 +419,7 @@ if (
     not dialog_state.get("assessment_complete", False)
     and dialog_state.get("turn_count", 0) > 0
     and st.session_state.chat_messages[-1]["role"] == "assistant"
+    and st.session_state.get("_show_chips", False)
 ):
     turn = dialog_state.get("turn_count", 1)
     if turn == 1:
@@ -473,30 +475,19 @@ else:
             if result["status"] == "follow_up":
                 # If no symptoms collected yet, decide based on which turn we're on.
                 if not result.get("collected_symptoms"):
-                    if result.get("turn_count", 1) <= 1:
-                        # Turn 1: input may be vague but health-related — ask for detail
-                        gentle_text = (
-                            "I want to make sure I help you correctly. Could you describe "
-                            "your symptoms in a bit more detail? For example, where does it "
-                            "hurt, or what feels wrong?"
-                        )
-                        st.markdown(gentle_text)
-                        st.session_state.chat_messages.append(
-                            {"role": "assistant", "content": gentle_text, "result": None}
-                        )
-                    else:
-                        # Turn 2+: still nothing extracted — show non-medical redirect
-                        end_text = (
-                            "I'm only able to help with health symptom assessments. "
-                            "Please use **🔄 Start New Assessment** in the sidebar "
-                            "whenever you're ready to describe your symptoms. Take care! 💙"
-                        )
-                        st.markdown(end_text)
-                        dialog_state["assessment_complete"] = True
-                        st.session_state.chat_messages.append(
-                            {"role": "assistant", "content": end_text, "result": None}
-                        )
+                    end_text = (
+                        "I'm only able to help with health symptom assessments. "
+                        "Please use **🔄 Start New Assessment** in the sidebar "
+                        "whenever you're ready to describe your symptoms. Take care! 💙"
+                    )
+                    st.markdown(end_text)
+                    dialog_state["assessment_complete"] = True
+                    st.session_state._show_chips = False
+                    st.session_state.chat_messages.append(
+                        {"role": "assistant", "content": end_text, "result": None}
+                    )
                 else:
+                    st.session_state._show_chips = True
                     follow_up_text = result["response"]
                     st.markdown(follow_up_text)
                     st.session_state.chat_messages.append(
