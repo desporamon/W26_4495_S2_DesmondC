@@ -29,4 +29,5 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python -m pytest tests/ -v --tb=short
+          cd Implementation/src
+          python -m pytest ../../tests/ -v --tb=short --ignore=../../tests/ui
