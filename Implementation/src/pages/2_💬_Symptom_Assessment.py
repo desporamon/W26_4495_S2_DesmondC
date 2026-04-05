@@ -392,10 +392,7 @@ if st.session_state.get("_chip_selected"):
         with st.spinner("Thinking..."):
             result = process_multiturn_message(chip_input, dialog_state)
         if result["status"] == "follow_up":
-            if result.get("collected_symptoms"):
-                st.session_state._show_chips = True
-            else:
-                st.session_state._show_chips = False
+            st.session_state._show_chips = True
             follow_up_text = result["response"]
             st.markdown(follow_up_text)
             st.session_state.chat_messages.append(
