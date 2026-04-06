@@ -1,10 +1,10 @@
 # W26_4495_S2_DesmondC
 
-## 📋 Project Information
+## Project Information
 
 | Field | Details |
 |-------|---------|
-| **Project Name** | BC Personal Health Management Platform |
+| **Project Name** | CedarCare — AI Health Navigation Platform |
 | **Student Name** | Desmond Chua |
 | **Student ID** | 300369803 |
 | **Email** | chuad1@student.douglascollege.ca |
@@ -15,254 +15,190 @@
 
 ---
 
-# 🏥 BC Personal Health Management Platform
+# CedarCare — AI Health Navigation Platform for British Columbia
 
-**CSIS 4495 Applied Research Project - Douglas College**
-
----
-
-## 📍 Overview
-
-The **BC Personal Health Management Platform** is a full-stack web application designed to help British Columbia residents navigate the provincial healthcare system with confidence. Built with Streamlit and powered by a **hybrid AI classification pipeline** — combining OpenAI natural language processing, CTAS-based rule logic, and a trained Random Forest ML model — the platform delivers real-time symptom assessment, personalized health dashboards, interactive facility mapping, and curated health education resources.
-
-This project demonstrates the practical application of machine learning, API integration, and modern web development to solve a real-world healthcare accessibility challenge in BC.
+**Live deployment:** https://cedarcare.streamlit.app  
+**Test account:** test@test.com / Password123
 
 ---
 
-## ❗ Problem Statement
+## What This Project Does
 
-British Columbia residents face challenges navigating the healthcare system:
+CedarCare helps BC residents figure out what to do when they feel unwell. A user describes their symptoms in plain language. The platform extracts structured medical data using GPT-4o-mini, runs it through 14 deterministic CTAS emergency rules, and classifies it with a trained Random Forest model across 41 disease categories. If the model confidence falls below 70%, the system falls back to OpenAI for general health guidance rather than forcing an uncertain prediction.
 
-- **Uncertainty** – Difficulty determining urgency of symptoms and appropriate care level
-- **Accessibility** – Limited awareness of nearby healthcare facilities and services
-- **Information Overload** – Scattered health resources without personalized guidance
-- **Wait Times** – Unnecessary ER visits for non-emergency conditions
-
-BC Health Platform addresses these issues through an intelligent, user-friendly assistant that provides personalized health guidance while respecting clinical safety standards.
+Beyond symptom assessment, the platform includes a personal health dashboard, a BC facility finder with an interactive Folium map, a health education library sourced from HealthLinkBC, and a system analytics dashboard with K-Means patient segmentation. Everything runs in a single Python stack — no separate frontend or backend API layer.
 
 ---
 
-## ✨ Key Features
+## Problem Statement
 
-| # | Feature | Description |
-|---|---------|-------------|
-| 1 | **AI-Powered Symptom Assessment** | Hybrid Rule-Based + ML classification with OpenAI integration for natural conversation |
-| 2 | **Personal Health Dashboard** | Track and visualize personal health metrics with interactive charts |
-| 3 | **BC Healthcare Facility Finder** | Locate nearby hospitals, clinics, walk-ins, and pharmacies |
-| 4 | **Health Education Resources** | Curated BC-specific health information from HealthLinkBC |
-| 5 | **System Analytics Dashboard** | Usage patterns, health trends, and ML-powered insights |
+With 895,000 BC residents lacking a family doctor and no Canadian-built AI symptom checker available since Babylon's collapse in 2023, there is no accessible tool that combines clinical triage with BC-specific care navigation.
+
+CedarCare addresses three specific gaps:
+- People do not know whether their symptoms warrant a 911 call, ER visit, walk-in clinic, or home care
+- No digital tool connects triage output to actual BC facilities nearby
+- No consumer health app offers longitudinal symptom tracking for individuals without a family doctor
 
 ---
 
-## 🚀 Installation Guide (Development)
+## Key Features
 
-### Prerequisites
+| Feature | Description |
+|---------|-------------|
+| **Symptom Assessment Chatbot** | Three-layer pipeline: GPT-4o-mini NLP extraction, CTAS rule-based safety check, Random Forest ML classification |
+| **Personal Health Dashboard** | Assessment history, urgency trends, symptom breakdown, Plotly charts |
+| **BC Facility Finder** | Interactive Folium map with hospital, walk-in, and urgent care locations |
+| **Health Education Library** | 18 articles across 8 categories sourced from HealthLinkBC |
+| **System Analytics Dashboard** | K-Means patient segmentation, population health trends, BC Health Authority breakdown |
 
-- **Python 3.10+** — [Download](https://www.python.org/downloads/)
-- **pip** — included with Python
-- **Git** — [Download](https://git-scm.com/downloads)
-- **OpenAI API Key** — [Get one here](https://platform.openai.com/api-keys)
+---
 
-### Setup Instructions
+## Technology Stack
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Web Framework** | Streamlit 1.41+ | Python-native UI — no separate frontend or backend API required |
+| **Language Model** | OpenAI GPT-4o-mini | NLP symptom extraction and fallback guidance |
+| **ML — Supervised** | scikit-learn RandomForestClassifier | Disease classification with 70% confidence threshold |
+| **ML — Unsupervised** | scikit-learn KMeans + StandardScaler | Patient segmentation across 3 behavioural clusters |
+| **Data Layer** | SQLite + bcrypt | Embedded database, password hashing |
+| **Visualisation** | Plotly + Folium | Interactive charts and BC facility maps |
+| **Testing** | pytest + Hypothesis | 95 automated tests: unit, integration, UI, property-based |
+| **CI/CD** | GitHub Actions | Automated pipeline on push to main, Ubuntu 22.04, Python 3.11 |
+| **Deployment** | Streamlit Community Cloud | Live at cedarcare.streamlit.app |
+
+---
+
+## Why Streamlit
+
+This project is data-science-first. Choosing React + FastAPI would have required maintaining a separate frontend build, a REST API layer, and two deployment pipelines. Streamlit runs the UI, the ML models, the OpenAI API calls, and the SQLite database in the same Python process. For a solo capstone focused on ML pipeline architecture rather than web infrastructure, that tradeoff was deliberate and appropriate.
+
+---
+
+## Quick Start (Live — No Installation Required)
+
+| Field | Value |
+|-------|-------|
+| **URL** | https://cedarcare.streamlit.app |
+| **Email** | test@test.com |
+| **Password** | Password123 |
+
+---
+
+## Installation (Local Development)
+
+**Prerequisites:** Python 3.11, Git, OpenAI API key
 
 **1. Clone the repository**
 ```bash
 git clone https://github.com/desporamon/W26_4495_S2_DesmondC.git
+cd BC-Health-Platform
 ```
 
-**2. Navigate to the project directory**
-```bash
-cd W26_4495_S2_DesmondC
-```
-
-**3. Create and activate a Python virtual environment**
+**2. Create and activate a virtual environment**
 ```bash
 python -m venv venv
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # macOS/Linux
 ```
-- **Windows:**
-  ```bash
-  venv\Scripts\activate
-  ```
-- **macOS / Linux:**
-  ```bash
-  source venv/bin/activate
-  ```
 
-**4. Install dependencies**
+**3. Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-**5. Set up the OpenAI API key**
+**4. Configure OpenAI API key**
 
-Create the secrets file at `Implementation/src/.streamlit/secrets.toml` and add your key:
+Create `Implementation/src/.streamlit/secrets.toml`:
 ```toml
-OPENAI_API_KEY = "sk-proj-your-api-key-here"
-```
-> ⚠️ Replace the placeholder with your own API key from [OpenAI](https://platform.openai.com/api-keys). Never commit this file to version control.
-
-**6. ML Model**
-
-A pre-trained Random Forest model (`model.pkl`) is already included in `Implementation/models/`. No training step is required.
-
-To optionally retrain the model:
-```bash
-cd Implementation/src
-python -m components.train_model
+OPENAI_API_KEY = "sk-your-key-here"
 ```
 
-**7. Run the Streamlit app**
+**5. Seed the database**
 ```bash
 cd Implementation/src
+python seed_db.py
+```
+
+**6. Run the application**
+```bash
 streamlit run app.py
 ```
 
-**8. Access the app**
-
-Open your browser and navigate to:
-```
-http://localhost:8501
-```
-
-**9. Demo credentials**
-
-A test account is available for quick access:
-| Field | Value |
-|-------|-------|
-| **Email** | `test@test.com` |
-| **Password** | `Password123` |
+Open http://localhost:8501 in your browser. Use test@test.com / Password123 or register a new account.
 
 ---
 
-## 🔬 Technical Approach
+## Running the Test Suite
 
-### Hybrid Classification System
-```
-User Input → OpenAI NLP → Rule-Based Safety Check (CTAS) → ML Classifier → Output
-                                    ↓
-                            Critical Symptom?
-                              ↓         ↓
-                            YES        NO
-                              ↓         ↓
-                        Emergency    ML Assessment
-                        (Call 911)   (Urgency Level)
+```bash
+# Full suite — 95 tests (unit, integration, UI, property-based)
+cd BC-Health-Platform
+pytest tests/ -v --tb=short
+
+# CI subset — 79 tests (matches GitHub Actions pipeline)
+pytest tests/ -v --ignore=tests/ui
 ```
 
-- **Layer 1:** OpenAI API for natural language understanding
-- **Layer 2:** Rule-based logic for critical symptom detection (CTAS guidelines)
-- **Layer 3:** Random Forest ML classifier for urgency prediction
+Note: UI AppTests must be run from the `Implementation/src/` working directory due to relative asset path dependencies.
 
 ---
 
-## 🛠️ Technology Stack
+## Repository Structure
 
-| Layer | Technology |
-|-------|------------|
-| **Platform** | Streamlit Cloud |
-| **Language** | Python 3.10+ |
-| **ML/NLP** | scikit-learn, NLTK, spaCy |
-| **AI Integration** | OpenAI API (gpt-4o-mini) |
-| **Visualization** | Streamlit Charts, Plotly, Folium |
-| **Database** | SQLite |
-| **Version Control** | GitHub |
-| **Data Sources** | Kaggle, HealthLinkBC, CTAS Guidelines |
-
----
-
-## 📁 Repository Structure
 ```
 W26_4495_S2_DesmondC/
-│
 ├── DocumentsAndReports/
-│   ├── final-report/           # Final report & documentation
-│   ├── midterm/                # Midterm report & demo video
-│   ├── progress-reports/       # Weekly progress reports
-│   ├── proposal/               # Project proposal
-│   ├── technical-reports/      # Data exploration & model training reports (PDF)
-│   │   ├── 01_data_exploration.pdf
-│   │   └── 02_train_model.pdf
-│   └── worklog/                # Work hours tracking (Excel)
-│
+│   ├── final-report/               # Final report and documentation
+│   ├── progress-reports/           # Sprint progress reports (PR1-PR6)
+│   ├── proposal/                   # Project proposal
+│   └── worklog/                    # Work hours log (Excel)
 ├── Implementation/
-│   ├── data/                   # Datasets (raw & processed)
-│   │   ├── health_platform.db  # SQLite database
-│   │   ├── symptom_disease_data.csv
-│   │   ├── symptom_severity.csv
-│   │   └── urgency_mapping.csv
-│   ├── models/                 # Trained ML models & metadata
-│   │   ├── model.pkl           # Random Forest classifier (joblib)
-│   │   └── model_metadata.json # Symptom list, urgency mapping, thresholds
-│   ├── notebooks/              # Jupyter notebooks for exploration
-│   │   ├── 01_data_exploration.ipynb
-│   │   └── 02_train_model.ipynb
-│   ├── samples/                # Proof of concept code
-│   ├── src/                    # Source code (Streamlit app)
-│   │   ├── .streamlit/
-│   │   │   └── config.toml     # Theme colors (VCH teal)
-│   │   ├── components/         # Reusable Python modules
-│   │   │   ├── auth.py         # Authentication (login, register, bcrypt)
-│   │   │   ├── chatbot.py      # Chatbot logic & conversation flow
-│   │   │   ├── database.py     # SQLite CRUD functions
-│   │   │   ├── openai_utils.py # OpenAI API integration
-│   │   │   ├── rules.py        # CTAS rule-based safety checks
-│   │   │   └── train_model.py  # ML training pipeline (Random Forest)
-│   │   ├── pages/              # Streamlit multi-page app
-│   │   │   ├── 1_🏠_Home.py
-│   │   │   ├── 2_💬_Symptom_Assessment.py
-│   │   │   ├── 3_📊_My_Dashboard.py
-│   │   │   ├── 4_🏥_Facility_Finder.py
-│   │   │   ├── 5_📚_Health_Library.py
-│   │   │   └── 6_📈_System_Analytics.py
-│   │   ├── app.py              # Main Streamlit application
-│   │   └── tests/              # Unit tests
-│   │       ├── test_openai.py
-│   │       ├── test_predict.py
-│   │       └── test_rules.py
-│
-├── Misc/                       # Miscellaneous resources
-├── design/                     # UI mockups (UX Pilot)
-├── learning-notes/             # Study materials, certificates, notes
-│
-├── .gitignore
-└── README.md
+│   ├── data/                       # SQLite database and synthetic CSV dataset
+│   ├── models/                     # model.pkl and model_metadata.json
+│   ├── notebooks/                  # EDA and model training Jupyter notebooks
+│   └── src/
+│       ├── components/             # auth, chatbot, database, rules, openai_utils
+│       ├── pages/                  # 6 Streamlit pages
+│       ├── app.py                  # Application entry point
+│       └── seed_db.py              # Seeds test account on fresh deployment
+├── tests/
+│   ├── unit/                       # test_auth, test_ctas_rules, test_database, test_ml_model
+│   ├── integration/                # test_pipeline, test_chatbot_scenarios
+│   ├── ui/                         # test_dashboard_apptest, test_chatbot_apptest
+│   └── property/                   # test_fuzz_hypothesis
+└── .github/
+    └── workflows/
+        └── ci.yml                  # GitHub Actions CI pipeline
 ```
----
-
-## 📊 Data Sources
-
-| Dataset | Source | Files | Purpose |
-|---------|--------|-------|---------|
-| **Disease Symptom Prediction** | [Kaggle (itachi9604)](https://www.kaggle.com/datasets/itachi9604/disease-symptom-description-dataset) | `symptom_disease_data.csv`, `symptom_severity.csv`, `symptom_description.csv`, `symptom_precaution.csv` | ML model training & Health Library |
-| **CTAS Guidelines** | Canadian Triage and Acuity Scale (2008) | Rule-based logic in `rules.py` | Emergency symptom detection |
-| **HealthLinkBC** | [healthlinkbc.ca](https://www.healthlinkbc.ca) | Referenced in app | Health education content |
 
 ---
 
-## 🗓️ Project Timeline
+## Data Sources
 
-| Phase | Duration | Milestone | Due Date |
-|-------|----------|-----------|----------|
-| **Phase 1** | Jan 13 - Feb 9 | Proposal Submission | Jan 26, 2026 |
-| **Phase 2** | Feb 10 - Mar 9 | Midterm Report & Demo | Feb 23, 2026 |
-| **Phase 3** | Mar 10 - Mar 30 | Check-in #2 | Mar 27, 2026 |
-| **Phase 4** | Mar 31 - Apr 14 | Final Report & Presentation | Apr 8-14, 2026 |
-
-**Total Duration:** 13 weeks | **Total Effort:** 144 hours
+| Source | Purpose |
+|--------|---------|
+| Kaggle — Disease Symptom Prediction dataset | ML model training (4,920 records, 41 diseases, 131 symptoms) |
+| CTAS Guidelines (Bullard et al., 2008) | 14 deterministic emergency detection rules |
+| HealthLinkBC | Health education library content (18 articles) |
 
 ---
 
-## 📈 Expected Outcomes
+## Project Stats
 
-- **Deployable Web App:** Fully functional Streamlit application on Streamlit Cloud
-- **Hybrid AI System:** OpenAI + Rule-Based + ML classification pipeline
-- **Interactive Dashboards:** Streamlit native charts, Plotly visualizations, and Folium maps
-- **Healthcare Integration:** BC facility data and HealthLinkBC resources
-- **Documentation:** Complete technical documentation and user guide
+| Metric | Value |
+|--------|-------|
+| **Automated tests** | 95 (unit, integration, UI, property-based) |
+| **CTAS emergency rules** | 14 |
+| **Disease categories** | 41 |
+| **Health education articles** | 18 |
+| **Development effort** | 185.35 hours across 8 sprints |
+| **Project period** | Jan 27 – Apr 6, 2026 |
 
 ---
 
-## 📌 License
+## License
 
-This project is part of **CSIS 4495 Applied Research Project** at **Douglas College**.
-
-© 2026 Desmond Chua. All rights reserved.
+CSIS 4495 Applied Research Project — Douglas College  
+Desmond Chua (300369803) — Winter 2026  
+All rights reserved.
