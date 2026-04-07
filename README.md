@@ -1,4 +1,4 @@
-# W26_4495_S2_DesmondC
+# CedarCare — Your AI Health Guide for BC
 
 ## Project Information
 
